@@ -108,7 +108,7 @@ pre-seeded demo account — signup is open and instant.
 
 ## Live Demo
 
-[LIVE URL — added after Vercel deployment]
+https://table-flow-qkk8as3m3-ayushhalpati09-gmailcoms-projects.vercel.app
 
 ## Repository
 
