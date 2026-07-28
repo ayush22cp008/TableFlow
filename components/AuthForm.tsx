@@ -26,6 +26,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
 
   // ---- SIGNUP FLOW ----
 
@@ -51,15 +52,13 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
     // emails will ONLY be delivered to the email address that the Resend account
     // was created with. Any other email addresses will silently fail to deliver.
     
-    // Sign up with email+password — Supabase sends OTP email (magic link)
+    // Sign up with email+password — Supabase sends OTP email
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         // Store role in user_metadata — we also update profiles table after OTP verify
         data: { role },
-        // Ensure the magic link hits our callback route to complete the auth flow
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
@@ -73,7 +72,45 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
     setStep('verify')
   }
 
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: 'signup'
+    })
+
+    if (verifyError) {
+      setError(verifyError.message)
+      setLoading(false)
+      return
+    }
+
+    // On success: fetch the user, update the profiles table, redirect
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const metadataRole = user.user_metadata?.role
+
+      if (metadataRole) {
+        await supabase.from('profiles').update({ role: metadataRole }).eq('id', user.id)
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+        
+      const userRole = profile?.role || metadataRole || 'customer'
+      window.location.href = userRole === 'owner' ? '/dashboard' : '/order'
+    } else {
+      setError('Verification succeeded but failed to retrieve user.')
+      setLoading(false)
+    }
+  }
 
   // ---- LOGIN FLOW ----
 
@@ -315,20 +352,45 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
     )
   }
 
-  // Step 3: Verify (Magic Link sent)
+  // Step 3: Verify (OTP sent)
   return (
     <div className="w-full max-w-md p-8 backdrop-blur-md bg-gray-900/40 border border-gray-800 rounded-2xl shadow-xl relative z-10">
-      <div className="mb-2 text-center">
-        <div className="text-4xl mb-3">📬</div>
-        <h2 className="text-3xl font-bold text-white mb-2">Check Your Email</h2>
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-bold text-white mb-2">Enter Verification Code</h2>
         <p className="text-gray-400">
-          We sent a magic link to <span className="text-indigo-400 font-medium">{email}</span>.
-        </p>
-        <p className="text-sm text-gray-500 mt-4 leading-relaxed">
-          Click the link in the email to verify your account and securely sign in. 
-          You can close this tab safely.
+          We sent a 6-digit code to <span className="text-indigo-400 font-medium">{email}</span>.
         </p>
       </div>
+
+      <form onSubmit={handleVerifyOtp} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Verification Code</label>
+          <input
+            id="otp-code"
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+            className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-center tracking-widest text-2xl font-mono"
+            placeholder="000000"
+            required
+          />
+        </div>
+
+        {error && (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">{error}</div>
+        )}
+
+        <button
+          id="verify-submit"
+          type="submit"
+          disabled={loading || otpCode.length !== 6}
+          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+        >
+          {loading ? 'Verifying...' : 'Verify & Sign In'}
+        </button>
+      </form>
 
       <div className="mt-8 pt-6 border-t border-gray-800 text-center">
         <p className="text-xs text-gray-500">

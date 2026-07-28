@@ -44,6 +44,7 @@ recovery-codes.txt
 supabase_logs.json
 body.json
 signup_body.json
+resend_api_key.txt
 
 # misc data files not part of source
 *.xlsx
