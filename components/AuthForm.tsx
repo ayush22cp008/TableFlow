@@ -369,7 +369,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
             id="otp-code"
             type="text"
             inputMode="numeric"
-            maxLength={6}
+            maxLength={10}
             value={otpCode}
             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
             className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-center tracking-widest text-2xl font-mono"
@@ -385,7 +385,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
         <button
           id="verify-submit"
           type="submit"
-          disabled={loading || otpCode.length !== 6}
+          disabled={loading || otpCode.length < 6}
           className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
         >
           {loading ? 'Verifying...' : 'Verify & Sign In'}
