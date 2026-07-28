@@ -63,7 +63,7 @@ Sign up with any real email as a customer, or as an owner using invite code `Tab
 - **Reservation label cosmetic delay:** after a reservation code is used to place an order, the table may still visually show "Reserved for {time}" (purple) even though it's fully occupied, until the bill is generated. This does not affect table allocation correctness — it's a cosmetic label priority issue only.
 - **No order cancellation from the owner dashboard yet:** cancelling an in-progress order does not currently release the table's occupied seats correctly, so this control has been intentionally removed for this release rather than ship a partially-working flow. Orders currently resolve via the normal billing flow, which does correctly release seats.
 - **No in-app notification after reservation arrival confirmation** — customer navigates to the order page manually, same as any walk-in.
-- **No direct link from the main menu to the reservation portal yet** — reservation URL must be shared directly (`/reserve`).
+
 
 ## Live Demo
 https://table-flow-nu.vercel.app
