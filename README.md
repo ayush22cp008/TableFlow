@@ -3,6 +3,14 @@ Built for VibeAthon 6.0 (NxtGenSec) — Professional Category, Solo — Team Cod
 
 **Status: Beta.** Core features are fully functional; a few known limitations are documented below.
 
+Research Foundation
+Before building, I used Google's Gemini Deep Research tool to run qualitative research across dozens of digital sources — primarily Reddit threads (r/mumbai, r/bangalore, r/delhi, r/india, r/Kerala) plus supporting industry data (NRAI, Petpooja, an Emerald Mumbai food-waste study, and the UNEP Food Waste Index) — to ground the feature set in real operator and customer pain points rather than assumptions. Key findings that directly shaped TableFlow's feature set:
+- Post-order dish unavailability (kitchen-menu desync) → Real-Time Menu & Live Availability
+- Opaque queues and artificial long waits → Digital Order Placement + Queue/Table Management
+- ~75% of restaurants over-prep food nightly with no demand forecasting → Menu Intelligence AI
+- Billing delays and hidden service charges → Transparent Itemized Billing
+The dish popularity classification and lightweight customer feedback loop (👍👎 + free-text suggestions) inside Menu Intelligence AI was my own addition beyond what the research surfaced — extending the forecasting data into an actionable menu-optimization signal.
+
 ## Problem Statement
 Most restaurant tech in the market solves food-delivery (customer-to-restaurant), not the actual operational chaos inside a restaurant — walk-in queues, table allocation, order-to-kitchen flow, and billing transparency. TableFlow is a full-stack SaaS built for a single restaurant's internal operations: from a customer walking in or reserving ahead, to live menu browsing, ordering, kitchen queue, seat-level table management, and a fully itemized bill.
 
