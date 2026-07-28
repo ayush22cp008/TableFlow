@@ -84,10 +84,17 @@ RESEND_API_KEY=your_resend_api_key
 npm run dev
 
 
-## Test Account
+## Test Accounts
 
-Sign up via the app directly, or use Google OAuth on the login page. No
-pre-seeded demo account — signup is open and instant.
+**Customer:**
+- Email: test.customer@example.com
+- Password: Test1234
+
+**Owner:**
+- Email: owner.demo@tableflow.systems
+- Password: owner@123
+
+You can also sign up fresh with any email as a customer, or use Google OAuth.
 
 ## Known Limitations
 
