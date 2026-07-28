@@ -11,7 +11,7 @@ import { UserRole } from '@/types'
 // Real security is via RLS is_owner() check in DB.
 // Change this value before demoing if needed.
 // ============================================================
-const OWNER_INVITE_CODE = 'VIBETHON2025'
+const OWNER_INVITE_CODE = 'TableFlow12'
 
 type SignupStep = 'role' | 'credentials' | 'verify'
 
