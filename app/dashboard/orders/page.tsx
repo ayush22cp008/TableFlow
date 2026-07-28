@@ -49,6 +49,7 @@ export default function OrdersBoardPage() {
     await supabase.from('orders').update({ status: next, updated_at: new Date().toISOString() }).eq('id', order.id)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function cancelOrder(order: Order) {
     if (!confirm('Cancel this order?')) return
     await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id)
