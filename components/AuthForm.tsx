@@ -358,7 +358,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-white mb-2">Enter Verification Code</h2>
         <p className="text-gray-400">
-          We sent a 6-digit code to <span className="text-indigo-400 font-medium">{email}</span>.
+          We sent a verification code to <span className="text-indigo-400 font-medium">{email}</span>.
         </p>
       </div>
 
