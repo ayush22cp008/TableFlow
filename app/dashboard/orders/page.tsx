@@ -8,7 +8,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Order, OrderStatus } from '@/types'
+import { Order, OrderStatus, OrderWithItems } from '@/types'
 import Navbar from '@/components/Navbar'
 import OrderStatusBadge from '@/components/OrderStatusBadge'
 import { PageLoader } from '@/components/LoadingSpinner'
@@ -22,16 +22,16 @@ const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
 }
 
 export default function OrdersBoardPage() {
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchOrders = useCallback(async () => {
     const { data } = await supabase
       .from('orders')
-      .select('*')
+      .select('*, order_items(quantity, menu_items(name))')
       .in('status', ACTIVE_STATUSES)
       .order('created_at')
-    setOrders((data as Order[]) ?? [])
+    setOrders((data as unknown as OrderWithItems[]) ?? [])
     setLoading(false)
   }, [])
 
@@ -49,10 +49,34 @@ export default function OrdersBoardPage() {
     await supabase.from('orders').update({ status: next, updated_at: new Date().toISOString() }).eq('id', order.id)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function cancelOrder(order: Order) {
     if (!confirm('Cancel this order?')) return
+
     await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id)
+
+    if (order.table_id) {
+      if (order.party_size == null) {
+        console.warn('Skipping table capacity update: order.party_size is null/undefined')
+      } else {
+        const { data: tableData } = await supabase
+          .from('restaurant_tables')
+          .select('occupied_seats')
+          .eq('id', order.table_id)
+          .single()
+
+        if (tableData) {
+          const currentOccupied = tableData.occupied_seats || 0
+          const newOccupiedSeats = Math.max(0, currentOccupied - order.party_size)
+          await supabase.from('restaurant_tables').update({
+            occupied_seats: newOccupiedSeats,
+            status: newOccupiedSeats === 0 ? 'available' : 'occupied',
+            reserved_from: null
+          }).eq('id', order.table_id)
+        }
+      }
+    }
+
+    fetchOrders()
   }
 
   if (loading) return <PageLoader />
@@ -81,6 +105,11 @@ export default function OrdersBoardPage() {
                           <span className={`text-xs ${elapsed > 15 ? 'text-red-400' : 'text-gray-500'}`}>{elapsed}m ago</span>
                         </div>
                         <p className="text-sm font-medium text-white">₹{order.total.toFixed(2)}</p>
+                        <ul className="text-xs text-gray-400 space-y-0.5">
+                          {order.order_items?.map((item, i) => (
+                            <li key={i}>{item.quantity}x {item.menu_items?.name}</li>
+                          ))}
+                        </ul>
                         <div className="flex gap-1.5">
                           {NEXT_STATUS[status] && (
                             <button onClick={() => advanceStatus(order)} className="flex-1 py-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-md">
@@ -92,7 +121,11 @@ export default function OrdersBoardPage() {
                               Bill
                             </Link>
                           )}
-
+                          {status !== 'served' && (
+                            <button onClick={() => cancelOrder(order)} className="flex-1 py-1 text-xs bg-red-900/50 hover:bg-red-800 text-red-200 rounded-md">
+                              Cancel
+                            </button>
+                          )}
                         </div>
                       </div>
                     )
