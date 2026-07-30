@@ -15,6 +15,11 @@ export async function GET(request: Request) {
       if (user) {
         const metadataRole = user.user_metadata?.role
 
+        const isNewUser = (Date.now() - new Date(user.created_at).getTime()) < 10000
+        if (isNewUser && !metadataRole) {
+          return NextResponse.redirect(`${origin}/auth/select-role`)
+        }
+
         // Ensure profiles table has the correct role (crucial for owners)
         if (metadataRole) {
           await supabase.from('profiles').update({ role: metadataRole }).eq('id', user.id)
