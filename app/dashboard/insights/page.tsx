@@ -11,9 +11,10 @@ import { useState } from 'react'
 import Navbar from '@/components/Navbar'
 
 interface InsightResult {
-  forecastData: { dish: string; predictedUnits: number; trend: 'up' | 'down' | 'flat' }[]
+  forecastData: { dish: string; predictedUnits: number; trend: 'up' | 'down' | 'flat'; reason: string }[]
   stars: string[]
   deadweight: string[]
+  feedbackSummary: string
 }
 
 export default function InsightsPage() {
@@ -101,10 +102,11 @@ export default function InsightsPage() {
                     return (
                       <div key={i} className={`p-4 border rounded-xl ${borderClass} ${bgClass}`}>
                         <p className="font-medium text-gray-200 truncate" title={data.dish}>{data.dish}</p>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2 mb-1">
                           <span className={`text-3xl font-bold ${textClass}`}>{data.predictedUnits}</span>
                           <span className={`text-xl ${trendColor}`}>{trendIcon}</span>
                         </div>
+                        <p className="text-xs text-gray-500 line-clamp-2" title={data.reason}>{data.reason}</p>
                       </div>
                     )
                   })}
@@ -114,6 +116,14 @@ export default function InsightsPage() {
                   No forecast data available yet.
                 </div>
               )}
+            </div>
+
+            {/* Customer Feedback Summary */}
+            <div>
+              <h2 className="font-semibold text-blue-400 mb-3">💬 Customer Feedback Summary</h2>
+              <div className="p-6 bg-gray-900/50 border border-blue-500/30 rounded-xl text-gray-300 text-sm">
+                {result.feedbackSummary}
+              </div>
             </div>
 
             {/* Star dishes */}
@@ -131,7 +141,8 @@ export default function InsightsPage() {
             {/* Dead-weight dishes */}
             {result.deadweight.length > 0 && (
               <div className="p-6 bg-gray-900/50 border border-red-500/30 rounded-xl">
-                <h2 className="font-semibold text-red-400 mb-3">💀 Consider Removing</h2>
+                <h2 className="font-semibold text-red-400 mb-1">💀 Deadweight Dishes</h2>
+                <p className="text-xs text-gray-400 mb-3">Low demand - consider promoting or reviewing these items.</p>
                 <div className="flex flex-wrap gap-2">
                   {result.deadweight.map((dish) => (
                     <span key={dish} className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-300 text-sm">{dish}</span>
