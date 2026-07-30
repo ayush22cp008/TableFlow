@@ -17,11 +17,13 @@ Most restaurant tech in the market solves food-delivery (customer-to-restaurant)
 ## Features
 - **Real-Time Menu & Live Availability** — customers see live dish availability; owner toggles items in/out of stock in real time via Supabase Realtime.
 - **Digital Order Placement + Queue/Table Management** — customers order digitally; orders flow into a live owner dashboard queue with automatic table allocation.
-- **Menu Intelligence AI (flagship)** — Gemini-powered demand forecasting, dish classification (star/deadweight analysis), and customer feedback summarization.
+- **Menu Intelligence AI (flagship)** — Gemini-powered demand forecasting with per-dish reasoning, dish classification (star/deadweight analysis), customer feedback summarization, and trend indicators (rising/falling/steady) computed from real order-history comparison.
 - **Sales & Analytics Dashboard** — revenue trends, top dishes, and operational insights for the owner.
 - **Transparent Itemized Billing** — customer-facing itemized bill generation tied directly to the order, with automatic seat/table release on billing.
+- **Live Orders Kanban** — board shows itemized order contents (dish name + quantity) directly on each card, not just totals.
 - **Table Reservations (bonus)** — customer-facing reservation request portal, owner approval workflow with a unique 6-digit verification code, and arrival confirmation that links the reservation directly to the customer's table on order placement (no re-allocation, no identity mismatch).
 - **Secure Email-Verified Signup** — signup uses a one-time verification code (OTP) sent to the user's email, entered on the same device/session that started signup — avoiding cross-device magic-link handoff issues.
+- **Modern UI** — refreshed, consistent visual design (dual-accent color system, polished cards) across the app.
 
 ## Tech Stack
 - **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS
@@ -67,9 +69,12 @@ npm run dev
 ## Getting Started as a Judge/Reviewer
 Sign up with any real email as a customer, or as an owner using invite code `TableFlow12` — email delivery is fully live on the verified custom domain, so the OTP verification code will arrive at any email address. Google OAuth is also available (creates customer-role accounts only).
 
+## Round 2 Judge Feedback — Resolved
+- **"README + UI flow enhancements" — resolved.** README updated with current feature set; UI refreshed with a consistent dual-accent design system (indigo + warm amber) applied across all customer and owner pages, including cards, buttons, and modals.
+- **"Not all expected features present after login" — resolved.** Root cause was Google OAuth signups defaulting to customer role; a role-selection step now runs for all OAuth signups, and owner-side features (Dashboard, Menu Management, Tables/Waitlist, Live Orders, Analytics, AI Insights) are fully accessible after correct role selection.
+
 ## Known Limitations (Beta)
 - **Reservation label cosmetic delay:** after a reservation code is used to place an order, the table may still visually show "Reserved for {time}" (purple) even though it's fully occupied, until the bill is generated. This does not affect table allocation correctness — it's a cosmetic label priority issue only.
-- **No order cancellation from the owner dashboard yet:** cancelling an in-progress order does not currently release the table's occupied seats correctly, so this control has been intentionally removed for this release rather than ship a partially-working flow. Orders currently resolve via the normal billing flow, which does correctly release seats.
 - **No in-app notification after reservation arrival confirmation** — customer navigates to the order page manually, same as any walk-in.
 
 
