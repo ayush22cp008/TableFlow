@@ -208,7 +208,7 @@ export default function TablesPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold">Restaurant Tables</h1>
-              <button onClick={() => setShowAddTable(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium">
+              <button onClick={() => setShowAddTable(true)} className="px-4 py-2 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-xl text-sm font-medium">
                 + Add Table
               </button>
             </div>
@@ -258,7 +258,7 @@ export default function TablesPage() {
             <h2 className="text-xl font-bold mb-4">Waitlist ({waitlist.length})</h2>
             <div className="space-y-3">
               {waitlist.map((entry, i) => (
-                <div key={entry.id} className="p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+                <div key={entry.id} className="p-4 bg-surface border border-surface-border rounded-card shadow-card">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold">{i + 1}</span>
                     <span className="font-medium text-white">{entry.customer_name}</span>
@@ -267,7 +267,7 @@ export default function TablesPage() {
                   <p className="text-xs text-gray-500 mb-3">{new Date(entry.joined_at).toLocaleTimeString()}</p>
                   <div className="flex gap-2">
                     <button onClick={() => seatWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg">Seat</button>
-                    <button onClick={() => cancelWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg">Cancel</button>
+                    <button onClick={() => cancelWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-lg">Cancel</button>
                   </div>
                 </div>
               ))}
@@ -279,7 +279,7 @@ export default function TablesPage() {
             <div className="space-y-4">
               {/* Pending */}
               {reservationRequests.filter(r => r.status === 'pending').map((req) => (
-                <div key={req.id} className="p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+                <div key={req.id} className="p-4 bg-surface border border-surface-border rounded-card shadow-card">
                   <div className="mb-2">
                     <h3 className="font-bold">{req.customer_name}</h3>
                     <p className="text-sm text-gray-400">Party of {req.party_size} • {new Date(req.requested_time).toLocaleString()}</p>
@@ -297,14 +297,14 @@ export default function TablesPage() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => approveRequest(req, codeInputs[req.id + '_table'])} className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg">Approve</button>
-                    <button onClick={() => rejectRequest(req)} className="flex-1 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg">Reject</button>
+                    <button onClick={() => rejectRequest(req)} className="flex-1 py-1.5 text-xs bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-lg">Reject</button>
                   </div>
                 </div>
               ))}
 
               {/* Approved */}
               {reservationRequests.filter(r => r.status === 'approved').map((req) => (
-                <div key={req.id} className="p-4 bg-gray-900/50 border border-indigo-900/50 rounded-xl">
+                <div key={req.id} className="p-4 bg-surface border border-indigo-900/50 rounded-xl">
                   <div className="mb-2 flex justify-between items-start">
                     <div>
                       <h3 className="font-bold">{req.customer_name}</h3>
@@ -319,7 +319,7 @@ export default function TablesPage() {
                       className="w-24 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-center font-mono outline-none"
                       onChange={(e) => setCodeInputs({ ...codeInputs, [req.id]: e.target.value })}
                     />
-                    <button onClick={() => confirmArrival(req)} className="flex-1 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">
+                    <button onClick={() => confirmArrival(req)} className="flex-1 py-1.5 text-xs bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-lg">
                       Confirm Arrival
                     </button>
                   </div>
@@ -334,19 +334,19 @@ export default function TablesPage() {
         {/* Add table modal */}
         {showAddTable && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-sm space-y-4">
+            <div className="bg-surface border border-surface-border rounded-card shadow-card p-6 w-full max-w-sm space-y-4">
               <h2 className="text-xl font-bold">Add Table</h2>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Table Number</label>
-                <input type="number" value={newTableNum} onChange={(e) => setNewTableNum(e.target.value)} className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="number" value={newTableNum} onChange={(e) => setNewTableNum(e.target.value)} className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-accent-indigo" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Seating Capacity</label>
-                <input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-accent-indigo" />
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setShowAddTable(false)} className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-sm">Cancel</button>
-                <button onClick={addTable} disabled={!newTableNum} className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium disabled:opacity-50">Add</button>
+                <button onClick={() => setShowAddTable(false)} className="flex-1 py-2.5 bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-xl text-sm">Cancel</button>
+                <button onClick={addTable} disabled={!newTableNum} className="flex-1 py-2.5 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-xl text-sm font-medium disabled:opacity-50">Add</button>
               </div>
             </div>
           </div>
@@ -355,15 +355,15 @@ export default function TablesPage() {
         {/* Reserve table modal */}
         {showReserveTable && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-sm space-y-4">
+            <div className="bg-surface border border-surface-border rounded-card shadow-card p-6 w-full max-w-sm space-y-4">
               <h2 className="text-xl font-bold">Reserve Table {showReserveTable.table_number}</h2>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Reservation Time</label>
-                <input type="datetime-local" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="datetime-local" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-accent-indigo" />
               </div>
               <div className="flex gap-3">
-                <button onClick={() => { setShowReserveTable(null); setReservationTime(''); }} className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-sm">Cancel</button>
-                <button onClick={setReservation} disabled={!reservationTime} className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium disabled:opacity-50">Save</button>
+                <button onClick={() => { setShowReserveTable(null); setReservationTime(''); }} className="flex-1 py-2.5 bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-xl text-sm">Cancel</button>
+                <button onClick={setReservation} disabled={!reservationTime} className="flex-1 py-2.5 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-xl text-sm font-medium disabled:opacity-50">Save</button>
               </div>
             </div>
           </div>

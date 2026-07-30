@@ -90,7 +90,7 @@ export default function OrdersBoardPage() {
           {ACTIVE_STATUSES.map((status) => {
             const colOrders = orders.filter((o) => o.status === status)
             return (
-              <div key={status} className="bg-gray-900/40 border border-gray-800 rounded-xl p-4">
+              <div key={status} className="bg-gray-900/40 border border-gray-800 rounded-card shadow-card p-4">
                 <div className="flex items-center justify-between mb-4">
                   <OrderStatusBadge status={status} />
                   <span className="text-xs text-gray-500">{colOrders.length}</span>
@@ -99,12 +99,12 @@ export default function OrdersBoardPage() {
                   {colOrders.map((order) => {
                     const elapsed = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000)
                     return (
-                      <div key={order.id} className="p-3 bg-gray-800/50 border border-gray-700 rounded-lg space-y-2">
+                      <div key={order.id} className="p-3 bg-surface border border-gray-700 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-mono text-gray-400">#{order.id.slice(0, 6)}</span>
                           <span className={`text-xs ${elapsed > 15 ? 'text-red-400' : 'text-gray-500'}`}>{elapsed}m ago</span>
                         </div>
-                        <p className="text-sm font-medium text-white">₹{order.total.toFixed(2)}</p>
+                        <p className="text-sm font-medium text-accent-amber">₹{order.total.toFixed(2)}</p>
                         <ul className="text-xs text-gray-400 space-y-0.5">
                           {order.order_items?.map((item, i) => (
                             <li key={i}>{item.quantity}x {item.menu_items?.name}</li>
@@ -112,7 +112,7 @@ export default function OrdersBoardPage() {
                         </ul>
                         <div className="flex gap-1.5">
                           {NEXT_STATUS[status] && (
-                            <button onClick={() => advanceStatus(order)} className="flex-1 py-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-md">
+                            <button onClick={() => advanceStatus(order)} className="flex-1 py-1 text-xs bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-md">
                               → {NEXT_STATUS[status]}
                             </button>
                           )}
@@ -122,7 +122,7 @@ export default function OrdersBoardPage() {
                             </Link>
                           )}
                           {status !== 'served' && (
-                            <button onClick={() => cancelOrder(order)} className="flex-1 py-1 text-xs bg-red-900/50 hover:bg-red-800 text-red-200 rounded-md">
+                            <button onClick={() => cancelOrder(order)} className="flex-1 py-1 text-xs bg-transparent border border-surface-border text-red-500 hover:bg-surface rounded-md">
                               Cancel
                             </button>
                           )}

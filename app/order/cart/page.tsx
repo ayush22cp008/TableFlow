@@ -287,7 +287,7 @@ export default function CartPage() {
               </p>
               <button
                 onClick={() => router.push('/order')}
-                className="mt-6 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-medium"
+                className="mt-6 px-6 py-2.5 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-card shadow-card transition-all font-medium"
               >
                 Back to Menu
               </button>
@@ -317,7 +317,7 @@ export default function CartPage() {
               <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
                 <button
                   onClick={() => router.push('/order')}
-                  className="px-6 py-2.5 border border-gray-600 text-gray-300 hover:bg-gray-800 rounded-xl transition-all font-medium"
+                  className="px-6 py-2.5 border border-gray-600 text-gray-300 hover:bg-gray-800 rounded-card shadow-card transition-all font-medium"
                 >
                   Edit Order
                 </button>
@@ -325,7 +325,7 @@ export default function CartPage() {
                 <button
                   onClick={() => placeOrderFromWaitlist(waitlistEntry)}
                   disabled={loading || cart.length === 0}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-medium disabled:opacity-50"
+                  className="px-6 py-2.5 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-card shadow-card transition-all font-medium disabled:opacity-50"
                 >
                   {loading ? 'Placing Order...' : (cart.length === 0 ? 'Cart Empty - Go to Menu' : 'Place Order Now')}
                 </button>
@@ -361,7 +361,7 @@ export default function CartPage() {
                   setWaitlistEntry(null)
                   router.push('/order')
                 }}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-medium"
+                className="px-6 py-2.5 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-card shadow-card transition-all font-medium"
               >
                 Back to Menu
               </button>
@@ -404,22 +404,22 @@ export default function CartPage() {
         ) : (
           <div className="space-y-4">
             {cart.map(({ menuItem, quantity }) => (
-              <div key={menuItem.id} className="flex items-center justify-between p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+              <div key={menuItem.id} className="flex items-center justify-between p-4 bg-surface border border-surface-border rounded-card shadow-card">
                 <div>
                   <p className="font-medium text-white">{menuItem.name}</p>
-                  <p className="text-sm text-gray-400">₹{menuItem.price.toFixed(2)} × {quantity}</p>
+                  <p className="text-sm text-accent-amber">₹{menuItem.price.toFixed(2)} × {quantity}</p>
                 </div>
-                <span className="text-indigo-400 font-semibold">₹{(menuItem.price * quantity).toFixed(2)}</span>
+                <span className="text-accent-amber font-semibold">₹{(menuItem.price * quantity).toFixed(2)}</span>
               </div>
             ))}
 
             <div className="border-t border-gray-800 pt-4 flex justify-between text-lg font-bold">
               <span>Subtotal</span>
-              <span className="text-indigo-400">₹{subtotal.toFixed(2)}</span>
+              <span className="text-accent-amber">₹{subtotal.toFixed(2)}</span>
             </div>
 
             {/* Reservation Code */}
-            <div className="mt-4 p-4 bg-gray-900 border border-gray-800 rounded-xl">
+            <div className="mt-4 p-4 bg-gray-900 border border-gray-800 rounded-card shadow-card">
               <label className="block text-sm font-medium text-gray-300 mb-2">Have a reservation code?</label>
               <div className="flex gap-2">
                 <input
@@ -431,11 +431,11 @@ export default function CartPage() {
                   className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
                 />
                 {!verifiedReservation ? (
-                  <button onClick={verifyReservationCode} disabled={!reservationCode || verifyingCode} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+                  <button onClick={verifyReservationCode} disabled={!reservationCode || verifyingCode} className="px-4 py-2 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-lg text-sm font-medium disabled:opacity-50">
                     Verify
                   </button>
                 ) : (
-                  <button onClick={() => { setVerifiedReservation(null); setReservationCode(''); }} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium">
+                  <button onClick={() => { setVerifiedReservation(null); setReservationCode(''); }} className="px-4 py-2 bg-transparent border border-surface-border text-text-secondary hover:bg-surface rounded-lg text-sm font-medium">
                     Clear
                   </button>
                 )}
@@ -458,7 +458,7 @@ export default function CartPage() {
                 max={maxCapacity}
                 disabled={!!verifiedReservation}
                 onChange={(e) => setPartySize(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700 rounded-card shadow-card text-white outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
               />
               {partySize > maxCapacity && (
                 <p className="mt-2 text-sm text-red-400">
@@ -474,7 +474,7 @@ export default function CartPage() {
             <button
               onClick={placeOrder}
               disabled={loading || partySize > maxCapacity}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 mt-2"
+              className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-card shadow-card transition-all disabled:opacity-50 mt-2"
             >
               {loading ? 'Finding your table...' : '✓ Place Order'}
             </button>

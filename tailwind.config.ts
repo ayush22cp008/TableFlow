@@ -9,9 +9,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        bg: "var(--bg)",
+        surface: "var(--surface)",
+        "surface-border": "var(--surface-border)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "accent-indigo": "var(--accent-indigo)",
+        "accent-indigo-hover": "var(--accent-indigo-hover)",
+        "accent-amber": "var(--accent-amber)",
+        "accent-amber-soft": "var(--accent-amber-soft)",
       },
+      borderRadius: {
+        card: "var(--radius-card)",
+      },
+      boxShadow: {
+        card: "var(--shadow-card)",
+      }
     },
   },
   plugins: [],

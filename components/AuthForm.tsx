@@ -156,7 +156,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
 
   if (view === 'login') {
     return (
-      <div className="w-full max-w-md p-8 backdrop-blur-md bg-gray-900/40 border border-gray-800 rounded-2xl shadow-xl relative z-10">
+      <div className="w-full max-w-md p-8 backdrop-blur-md bg-surface border border-surface-border rounded-card shadow-card relative z-10">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
           <p className="text-gray-400">Sign in to your account</p>
@@ -170,7 +170,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo focus:border-transparent outline-none transition-all"
               placeholder="you@example.com"
               required
             />
@@ -182,7 +182,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
               required
             />
@@ -196,7 +196,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
             id="login-submit"
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+            className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -211,7 +211,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
           <button
             id="google-login"
             onClick={handleGoogleLogin}
-            className="w-full py-3 flex items-center justify-center gap-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 text-white font-medium rounded-xl transition-all"
+            className="w-full py-3 flex items-center justify-center gap-3 bg-transparent hover:bg-surface border border-surface-border text-text-secondary font-medium rounded-xl transition-all"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -236,7 +236,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
   // Step 1: Choose role
   if (step === 'role') {
     return (
-      <div className="w-full max-w-md p-8 backdrop-blur-md bg-gray-900/40 border border-gray-800 rounded-2xl shadow-xl relative z-10">
+      <div className="w-full max-w-md p-8 backdrop-blur-md bg-surface border border-surface-border rounded-card shadow-card relative z-10">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
           <p className="text-gray-400">Who are you joining as?</p>
@@ -251,8 +251,8 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
                 onClick={() => setRole(r)}
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
                   role === r
-                    ? 'border-indigo-500 bg-indigo-500/10 text-white'
-                    : 'border-gray-700 bg-gray-800/30 text-gray-400 hover:border-gray-600'
+                    ? 'border-accent-indigo bg-accent-indigo/10 shadow-[0_0_15px_rgba(99,102,241,0.2)] text-white'
+                    : 'border-surface-border bg-surface text-gray-400 hover:border-gray-600'
                 }`}
               >
                 <div className="text-2xl mb-1">{r === 'customer' ? '🍽️' : '👨‍🍳'}</div>
@@ -269,7 +269,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
                 type="text"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all"
                 placeholder="Enter invite code"
               />
             </div>
@@ -282,7 +282,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
           <button
             id="role-next"
             type="submit"
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02]"
+            className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02]"
           >
             Continue
           </button>
@@ -299,7 +299,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
   // Step 2: Email + Password
   if (step === 'credentials') {
     return (
-      <div className="w-full max-w-md p-8 backdrop-blur-md bg-gray-900/40 border border-gray-800 rounded-2xl shadow-xl relative z-10">
+      <div className="w-full max-w-md p-8 backdrop-blur-md bg-surface border border-surface-border rounded-card shadow-card relative z-10">
         <button onClick={() => setStep('role')} className="text-gray-400 hover:text-white text-sm mb-6 flex items-center gap-1">
           ← Back
         </button>
@@ -316,7 +316,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all"
               placeholder="you@example.com"
               required
             />
@@ -328,7 +328,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all"
               placeholder="Min. 6 characters"
               minLength={6}
               required
@@ -343,7 +343,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
             id="signup-submit"
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50"
+            className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50"
           >
             {loading ? 'Sending OTP...' : 'Continue'}
           </button>
@@ -354,7 +354,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
 
   // Step 3: Verify (OTP sent)
   return (
-    <div className="w-full max-w-md p-8 backdrop-blur-md bg-gray-900/40 border border-gray-800 rounded-2xl shadow-xl relative z-10">
+    <div className="w-full max-w-md p-8 backdrop-blur-md bg-surface border border-surface-border rounded-card shadow-card relative z-10">
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-white mb-2">Enter Verification Code</h2>
         <p className="text-gray-400">
@@ -372,7 +372,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
             maxLength={10}
             value={otpCode}
             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-            className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-center tracking-widest text-2xl font-mono"
+            className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all text-center tracking-widest text-2xl font-mono"
             placeholder="000000"
             required
           />
@@ -386,7 +386,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
           id="verify-submit"
           type="submit"
           disabled={loading || otpCode.length < 6}
-          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+          className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
         >
           {loading ? 'Verifying...' : 'Verify & Sign In'}
         </button>

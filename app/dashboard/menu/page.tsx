@@ -95,20 +95,20 @@ export default function MenuManagementPage() {
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Menu Management</h1>
-          <button onClick={openAdd} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-all">
+          <button onClick={openAdd} className="px-4 py-2 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-card shadow-card font-medium transition-all">
             + Add Item
           </button>
         </div>
 
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+            <div key={item.id} className="flex items-center gap-4 p-4 bg-surface border border-surface-border rounded-card shadow-card">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-white truncate">{item.name}</p>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-400">{item.category}</span>
                 </div>
-                <p className="text-sm text-gray-400 mt-0.5">₹{item.price.toFixed(2)}{item.description && ` — ${item.description.slice(0, 60)}`}</p>
+                <p className="text-sm text-accent-amber mt-0.5">₹{item.price.toFixed(2)}{item.description && ` — ${item.description.slice(0, 60)}`}</p>
               </div>
               <div className="flex items-center gap-2">
                 {/* Availability toggle */}
@@ -122,7 +122,7 @@ export default function MenuManagementPage() {
                 >
                   {item.is_available ? 'Available' : 'Hidden'}
                 </button>
-                <button onClick={() => openEdit(item)} className="px-3 py-1 rounded-lg text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition-all">Edit</button>
+                <button onClick={() => openEdit(item)} className="px-3 py-1 rounded-lg text-xs font-medium bg-transparent border border-surface-border text-text-secondary hover:bg-surface border border-gray-700 transition-all">Edit</button>
                 <button onClick={() => softDelete(item)} className="px-3 py-1 rounded-lg text-xs font-medium bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all">Remove</button>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function MenuManagementPage() {
         {/* Add/Edit Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md space-y-4">
+            <div className="bg-surface border border-surface-border rounded-card shadow-card p-6 w-full max-w-md space-y-4">
               <h2 className="text-xl font-bold">{editItem ? 'Edit Item' : 'Add Menu Item'}</h2>
               <div className="space-y-3">
                 {[
@@ -155,15 +155,15 @@ export default function MenuManagementPage() {
                       value={form[key as keyof typeof form]}
                       onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                       placeholder={placeholder}
-                      className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-accent-indigo text-sm"
                     />
                   </div>
                 ))}
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="flex gap-3 pt-2">
-                <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-sm transition-all">Cancel</button>
-                <button onClick={handleSave} disabled={saving || !form.name || !form.price} className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-all">
+                <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-card shadow-card text-sm transition-all">Cancel</button>
+                <button onClick={handleSave} disabled={saving || !form.name || !form.price} className="flex-1 py-2.5 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-card shadow-card text-sm font-medium disabled:opacity-50 transition-all">
                   {saving ? 'Saving...' : 'Save'}
                 </button>
               </div>

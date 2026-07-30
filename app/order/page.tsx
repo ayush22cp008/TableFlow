@@ -97,7 +97,7 @@ export default function OrderPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-white">Menu</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-white">Menu</h1>
             <p className="text-gray-400 text-sm mt-0.5">Fresh items, updated in real time</p>
             <Link
               href="/reserve"
@@ -109,10 +109,10 @@ export default function OrderPage() {
           {cartCount > 0 && (
             <Link
               href="/order/cart"
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-xl transition-all font-medium"
             >
               🛒 Cart
-              <span className="bg-white text-indigo-600 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-white text-accent-indigo text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                 {cartCount}
               </span>
             </Link>
@@ -127,8 +127,8 @@ export default function OrderPage() {
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 activeCategory === cat
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                  ? 'bg-accent-indigo text-white'
+                  : 'bg-transparent border border-surface-border text-text-secondary hover:bg-surface'
               }`}
             >
               {cat === 'all' ? 'All Items' : cat.charAt(0).toUpperCase() + cat.slice(1)}

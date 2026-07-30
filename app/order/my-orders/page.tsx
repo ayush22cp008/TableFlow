@@ -48,7 +48,7 @@ export default function MyOrdersPage() {
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 py-10">
-        <h1 className="text-2xl font-bold mb-6">My Orders</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight mb-6">My Orders</h1>
 
         {orders.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
@@ -58,7 +58,7 @@ export default function MyOrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <div key={order.id} className="p-5 bg-gray-900/50 border border-gray-800 rounded-xl space-y-3">
+              <div key={order.id} className="p-5 bg-surface border border-surface-border rounded-card shadow-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500 font-mono">{order.id.slice(0, 8)}</p>
@@ -68,7 +68,7 @@ export default function MyOrdersPage() {
                 </div>
                 <div className="flex items-center justify-between border-t border-gray-800 pt-3">
                   <span className="text-gray-400 text-sm">Total</span>
-                  <span className="text-indigo-400 font-semibold">₹{order.total.toFixed(2)}</span>
+                  <span className="text-accent-amber font-semibold">₹{order.total.toFixed(2)}</span>
                 </div>
                 {(order.status === 'served' || order.status === 'billed') && (
                   <div className="border-t border-gray-800 pt-3">

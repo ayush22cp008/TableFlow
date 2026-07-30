@@ -107,7 +107,7 @@ export default function BillingPage() {
         </div>
 
         {/* Order items */}
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden mb-4">
+        <div className="bg-surface border border-surface-border rounded-card shadow-card overflow-hidden mb-4">
           <div className="px-5 py-3 border-b border-gray-800 text-sm font-medium text-gray-400 flex justify-between">
             <span>Item</span>
             <span>Amount</span>
@@ -116,18 +116,18 @@ export default function BillingPage() {
             <div key={item.id} className="px-5 py-3 flex items-center justify-between border-b border-gray-800/50 last:border-0">
               <div>
                 <p className="text-white text-sm font-medium">{item.menu_items.name}</p>
-                <p className="text-gray-400 text-xs">₹{item.unit_price.toFixed(2)} × {item.quantity}</p>
+                <p className="text-accent-amber text-xs">₹{item.unit_price.toFixed(2)} × {item.quantity}</p>
               </div>
-              <span className="text-white font-medium">₹{item.item_total.toFixed(2)}</span>
+              <span className="text-accent-amber font-medium">₹{item.item_total.toFixed(2)}</span>
             </div>
           ))}
         </div>
 
         {/* Totals */}
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-5 space-y-3">
+        <div className="bg-surface border border-surface-border rounded-card shadow-card p-5 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Subtotal</span>
-            <span className="text-white">₹{subtotal.toFixed(2)}</span>
+            <span className="text-accent-amber">₹{subtotal.toFixed(2)}</span>
           </div>
 
           {/* Service charge toggle */}
@@ -151,7 +151,7 @@ export default function BillingPage() {
 
           <div className="flex justify-between text-lg font-bold border-t border-gray-700 pt-3">
             <span>Total</span>
-            <span className="text-indigo-400">₹{total.toFixed(2)}</span>
+            <span className="text-accent-amber">₹{total.toFixed(2)}</span>
           </div>
         </div>
 
@@ -159,7 +159,7 @@ export default function BillingPage() {
           <button
             onClick={generateBill}
             disabled={generating}
-            className="w-full mt-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all disabled:opacity-50"
+            className="w-full mt-5 py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-card shadow-card transition-all disabled:opacity-50"
           >
             {generating ? 'Generating...' : '✓ Generate Bill & Mark as Billed'}
           </button>
