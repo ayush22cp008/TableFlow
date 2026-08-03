@@ -8,7 +8,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { RestaurantTable, WaitlistEntry, ReservationRequest } from '@/types'
+import { RestaurantTable, WaitlistEntry, ReservationRequest, Order } from '@/types'
 import Navbar from '@/components/Navbar'
 import { PageLoader } from '@/components/LoadingSpinner'
 
@@ -40,6 +40,7 @@ export default function TablesPage() {
   const [tables, setTables] = useState<RestaurantTable[]>([])
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
   const [reservationRequests, setReservationRequests] = useState<ReservationRequest[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddTable, setShowAddTable] = useState(false)
   const [newTableNum, setNewTableNum] = useState('')
@@ -49,14 +50,16 @@ export default function TablesPage() {
   const [reservationTime, setReservationTime] = useState('')
 
   const fetchData = useCallback(async () => {
-    const [{ data: t }, { data: w }, { data: r }] = await Promise.all([
+    const [{ data: t }, { data: w }, { data: r }, { data: o }] = await Promise.all([
       supabase.from('restaurant_tables').select('*').order('table_number'),
       supabase.from('waitlist').select('*').eq('status', 'waiting').order('joined_at'),
-      supabase.from('reservation_requests').select('*').in('status', ['pending', 'approved']).order('requested_time'),
+      supabase.from('reservation_requests').select('*').in('status', ['pending', 'approved', 'completed']).order('requested_time'),
+      supabase.from('orders').select('*')
     ])
     setTables((t as RestaurantTable[]) ?? [])
     setWaitlist((w as WaitlistEntry[]) ?? [])
     setReservationRequests((r as ReservationRequest[]) ?? [])
+    setOrders((o as Order[]) ?? [])
     setLoading(false)
   }, [])
 
@@ -66,6 +69,7 @@ export default function TablesPage() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurant_tables' }, fetchData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'waitlist' }, fetchData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reservation_requests' }, fetchData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchData)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [fetchData])
@@ -188,6 +192,34 @@ export default function TablesPage() {
     fetchData()
   }
 
+  const now = Date.now()
+  const visibleReservations = reservationRequests.filter(req => {
+    if (req.status === 'pending') return true
+    
+    if (req.status === 'approved' || req.status === 'completed') {
+      const requestedTime = new Date(req.requested_time).getTime()
+      
+      const linkedOrder = [...orders]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .find(order => {
+          if (order.table_id !== req.table_id) return false
+          const orderTime = new Date(order.created_at).getTime()
+          return orderTime >= requestedTime - 30 * 60 * 1000 && orderTime <= requestedTime + 30 * 60 * 1000
+        })
+
+      if (linkedOrder) {
+        if (linkedOrder.status === 'billed') {
+          const billedTime = new Date(linkedOrder.updated_at).getTime()
+          return now <= billedTime + 5 * 60 * 1000
+        }
+        return true
+      } else {
+        return now <= requestedTime + 30 * 60 * 1000
+      }
+    }
+    return false
+  })
+
   if (loading) return <PageLoader />
 
   return (
@@ -269,7 +301,7 @@ export default function TablesPage() {
             <h2 className="text-xl font-bold mb-4 mt-8">Reservation Requests ({reservationRequests.length})</h2>
             <div className="space-y-4">
               {/* Pending */}
-              {reservationRequests.filter(r => r.status === 'pending').map((req) => (
+              {visibleReservations.filter(r => r.status === 'pending').map((req) => (
                 <div key={req.id} className="p-4 bg-surface border border-surface-border rounded-card shadow-card">
                   <div className="mb-2">
                     <h3 className="font-bold">{req.customer_name}</h3>
@@ -294,20 +326,22 @@ export default function TablesPage() {
               ))}
 
               {/* Approved */}
-              {reservationRequests.filter(r => r.status === 'approved').map((req) => (
+              {visibleReservations.filter(r => r.status === 'approved' || r.status === 'completed').map((req) => (
                 <div key={req.id} className="p-4 bg-surface border border-indigo-900/50 rounded-xl">
                   <div className="mb-2 flex justify-between items-start">
                     <div>
                       <h3 className="font-bold">{req.customer_name}</h3>
                       <p className="text-sm text-gray-400">Party of {req.party_size}</p>
                     </div>
-                    <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs rounded-full font-medium">Approved</span>
+                    <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs rounded-full font-medium">
+                      {req.status === 'completed' ? 'Seated' : 'Approved'}
+                    </span>
                   </div>
 
                 </div>
               ))}
               
-              {reservationRequests.length === 0 && <p className="text-gray-400 text-sm">No active requests.</p>}
+              {visibleReservations.length === 0 && <p className="text-gray-400 text-sm">No active requests.</p>}
             </div>
           </div>
         </div>
