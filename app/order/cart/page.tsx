@@ -157,7 +157,8 @@ export default function CartPage() {
           p_table_id: assignedTableId,
           p_subtotal: subtotal,
           p_total: subtotal,
-          p_party_size: verifiedReservation ? verifiedReservation.party_size : partySize
+          p_party_size: verifiedReservation ? verifiedReservation.party_size : partySize,
+          p_is_priority: !!verifiedReservation
         }
       )
 

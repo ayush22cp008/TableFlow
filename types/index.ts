@@ -78,6 +78,8 @@ export type Order = {
   service_charge_amount: number
   total: number
   party_size?: number | null
+  is_priority?: boolean
+  daily_number?: number
   created_at: string
   updated_at: string
 }

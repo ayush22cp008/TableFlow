@@ -30,7 +30,8 @@ export default function OrdersBoardPage() {
       .from('orders')
       .select('*, order_items(quantity, menu_items(name))')
       .in('status', ACTIVE_STATUSES)
-      .order('created_at')
+      .order('is_priority', { ascending: false })
+      .order('created_at', { ascending: true })
     setOrders((data as unknown as OrderWithItems[]) ?? [])
     setLoading(false)
   }, [])
@@ -98,14 +99,30 @@ export default function OrdersBoardPage() {
                 <div className="space-y-3">
                   {colOrders.map((order) => {
                     const elapsed = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000)
+                    const orderNumber = order.daily_number
+                      ? `${order.is_priority ? 'R' : 'W'}${order.daily_number}`
+                      : `#${order.id.slice(0, 6)}`
+                    
                     return (
-                      <div key={order.id} className="p-3 bg-surface border border-gray-700 rounded-lg space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono text-gray-400">#{order.id.slice(0, 6)}</span>
-                          <span className={`text-xs ${elapsed > 15 ? 'text-red-400' : 'text-gray-500'}`}>{elapsed}m ago</span>
+                      <div key={order.id} className="bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700/50 flex flex-col">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-white font-mono">{orderNumber}</span>
+                            {order.is_priority && (
+                              <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-amber-500/20 text-amber-400 tracking-wider border border-amber-500/30">
+                                Priority
+                              </span>
+                            )}
+                            {order.table_id && (
+                              <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-gray-700 text-gray-300 tracking-wider">
+                                Table
+                              </span>
+                            )}
+                          </div>
+                          <span className={`text-xs ${elapsed > 15 ? 'text-red-400' : 'text-gray-400'}`}>{elapsed}m ago</span>
                         </div>
-                        <p className="text-sm font-medium text-accent-amber">₹{order.total.toFixed(2)}</p>
-                        <ul className="text-xs text-gray-400 space-y-0.5">
+                        <p className="text-sm font-medium text-amber-500 mb-2">₹{order.total.toFixed(2)}</p>
+                        <ul className="text-xs text-gray-400 space-y-0.5 mb-3">
                           {order.order_items?.map((item, i) => (
                             <li key={i}>{item.quantity}x {item.menu_items?.name}</li>
                           ))}
