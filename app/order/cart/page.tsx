@@ -77,13 +77,20 @@ export default function CartPage() {
     setError(null)
     const { data, error } = await supabase
       .from('reservation_requests')
-      .select('id, table_id, party_size, restaurant_tables(table_number)')
+      .select('id, table_id, party_size, requested_time, restaurant_tables(table_number)')
       .eq('unique_code', reservationCode)
-      .eq('status', 'arrived')
+      .eq('status', 'approved')
       .limit(1)
       .single()
 
     if (error || !data || !data.table_id) {
+      setError('Invalid or unused code, or missing table assignment.')
+      setVerifyingCode(false)
+      return
+    }
+
+    const requestedTimeMs = new Date(data.requested_time).getTime()
+    if (Date.now() > requestedTimeMs + 30 * 60 * 1000) {
       setError('Invalid or unused code, or missing table assignment.')
       setVerifyingCode(false)
       return

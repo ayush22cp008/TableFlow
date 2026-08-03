@@ -122,16 +122,7 @@ export default function TablesPage() {
     fetchData()
   }
 
-  async function confirmArrival(req: ReservationRequest) {
-    const entered = codeInputs[req.id]
-    if (entered !== req.unique_code) {
-      window.alert('Invalid code')
-      return
-    }
-    
-    await supabase.from('reservation_requests').update({ status: 'arrived' }).eq('id', req.id)
-    fetchData()
-  }
+
 
   async function seatWaitlistEntry(entry: WaitlistEntry) {
     const { data: tables } = await supabase
@@ -312,17 +303,7 @@ export default function TablesPage() {
                     </div>
                     <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs rounded-full font-medium">Approved</span>
                   </div>
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="text"
-                      placeholder="Enter code"
-                      className="w-24 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-center font-mono outline-none"
-                      onChange={(e) => setCodeInputs({ ...codeInputs, [req.id]: e.target.value })}
-                    />
-                    <button onClick={() => confirmArrival(req)} className="flex-1 py-1.5 text-xs bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-lg">
-                      Confirm Arrival
-                    </button>
-                  </div>
+
                 </div>
               ))}
               
