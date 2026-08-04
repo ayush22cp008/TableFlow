@@ -2,7 +2,18 @@
 // TypeScript types for all VibeAthon DB tables
 // ============================================================
 
-export type UserRole = 'customer' | 'owner'
+export type UserRole = 'customer' | 'owner' | 'waiter' | 'cook' | 'manager'
+
+export type InviteCode = {
+  id: string
+  code: string
+  role: 'waiter' | 'cook' | 'manager'
+  staff_name: string
+  staff_email: string
+  status: 'unused' | 'used' | 'expired'
+  created_by: string
+  created_at: string
+}
 
 
 export type ReservationRequest = {
@@ -78,8 +89,10 @@ export type Order = {
   service_charge_amount: number
   total: number
   party_size?: number | null
-  is_priority?: boolean
-  daily_number?: number
+  is_priority: boolean
+  daily_number: number | null
+  cancellation_reason?: string
+  cancellation_category?: 'fire' | 'food_safety' | 'natural_disaster' | 'other' | 'manual'
   created_at: string
   updated_at: string
 }

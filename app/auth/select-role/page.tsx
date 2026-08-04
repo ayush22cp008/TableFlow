@@ -5,6 +5,14 @@ import { supabase } from '@/lib/supabase'
 import { UserRole } from '@/types'
 import { OWNER_INVITE_CODE } from '@/components/AuthForm'
 
+const ROLE_ICONS: Record<UserRole, string> = {
+  customer: '🍽️',
+  owner: '👑',
+  waiter: '🏃',
+  cook: '👨‍🍳',
+  manager: '📋'
+}
+
 export default function SelectRolePage() {
   const [role, setRole] = useState<UserRole>('customer')
   const [inviteCode, setInviteCode] = useState('')
@@ -26,10 +34,65 @@ export default function SelectRolePage() {
     
     const { data: { user } } = await supabase.auth.getUser()
     
-    if (!user) {
+    if (!user || !user.email) {
       setError('No authenticated user found. Please try logging in again.')
       setLoading(false)
       return
+    }
+
+    if (role === 'waiter' || role === 'cook' || role === 'manager') {
+      // 1. Role tag check in the string
+      const tag = role === 'waiter' ? 'WT' : role === 'cook' ? 'CO' : 'MN'
+      if (!inviteCode.includes(tag)) {
+        setError('Invalid code format for the selected role.')
+        setLoading(false)
+        return
+      }
+
+      // Fetch code from DB
+      const { data: codeData, error: codeErr } = await supabase
+        .from('invite_codes')
+        .select('*')
+        .eq('code', inviteCode.trim())
+        .single()
+
+      if (codeErr || !codeData) {
+        setError('Invalid or unused invite code.')
+        setLoading(false)
+        return
+      }
+
+      if (codeData.status !== 'unused') {
+        setError('This invite code has already been used or is expired.')
+        setLoading(false)
+        return
+      }
+
+      // 2. Identity match
+      if (codeData.staff_email.toLowerCase() !== user.email.toLowerCase()) {
+        setError('This invite code is registered to a different email address.')
+        setLoading(false)
+        return
+      }
+
+      // 3. Role match
+      if (codeData.role !== role) {
+        setError('This invite code is not for the selected role.')
+        setLoading(false)
+        return
+      }
+
+      // Mark code as used
+      const { error: codeUpdateErr } = await supabase
+        .from('invite_codes')
+        .update({ status: 'used' })
+        .eq('id', codeData.id)
+
+      if (codeUpdateErr) {
+        setError('Failed to redeem invite code.')
+        setLoading(false)
+        return
+      }
     }
 
     const { error: updateError } = await supabase
@@ -44,7 +107,7 @@ export default function SelectRolePage() {
     }
 
     // On success: redirect
-    window.location.href = role === 'owner' ? '/dashboard' : '/order'
+    window.location.href = (role === 'owner' || role === 'manager') ? '/dashboard' : '/order'
   }
 
   return (
@@ -61,26 +124,28 @@ export default function SelectRolePage() {
 
         <form onSubmit={handleRoleStep} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            {(['customer', 'owner'] as UserRole[]).map((r) => (
+            {(['customer', 'owner', 'waiter', 'cook', 'manager'] as UserRole[]).map((r) => (
               <button
                 key={r}
                 type="button"
-                onClick={() => setRole(r)}
+                onClick={() => { setRole(r); setInviteCode(''); setError(null); }}
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
                   role === r
                     ? 'border-accent-indigo bg-accent-indigo/10 shadow-[0_0_15px_rgba(99,102,241,0.2)] text-white'
                     : 'border-surface-border bg-surface text-gray-400 hover:border-gray-600'
                 }`}
               >
-                <div className="text-2xl mb-1">{r === 'customer' ? '🍽️' : '👨‍🍳'}</div>
+                <div className="text-2xl mb-1">{ROLE_ICONS[r]}</div>
                 <div className="font-medium capitalize">{r}</div>
               </button>
             ))}
           </div>
 
-          {role === 'owner' && (
+          {(role === 'owner' || role === 'waiter' || role === 'cook' || role === 'manager') && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Owner Invite Code</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                {role === 'owner' ? 'Owner Invite Code' : 'Staff Invite Code'}
+              </label>
               <input
                 id="invite-code"
                 type="text"
