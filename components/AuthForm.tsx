@@ -6,6 +6,14 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { UserRole } from '@/types'
 
+const ROLE_ICONS: Record<UserRole, string> = {
+  customer: '🍽️',
+  owner: '👑',
+  waiter: '🏃',
+  cook: '👨‍🍳',
+  manager: '📋'
+}
+
 // ============================================================
 // Owner invite code gate — client-side UX gate only.
 // Real security is via RLS is_owner() check in DB.
@@ -13,7 +21,7 @@ import { UserRole } from '@/types'
 // ============================================================
 export const OWNER_INVITE_CODE = 'TableFlow12'
 
-type SignupStep = 'role' | 'credentials' | 'verify'
+type SignupStep = 'role' | 'credentials' | 'verify' | 'staff-verify'
 
 export function AuthForm({ view }: { view: 'login' | 'signup' }) {
   // const router = useRouter()
@@ -38,8 +46,34 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
         setError('Invalid owner invite code.')
         return
       }
+      setStep('credentials')
+    } else if (role !== 'customer') {
+      if (!email.trim()) {
+        setError('Please enter your email.')
+        return
+      }
+      setLoading(true)
+      try {
+        const res = await fetch('/api/send-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, role })
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          setError(data.error || 'Failed to send invite')
+          setLoading(false)
+          return
+        }
+        setStep('staff-verify')
+      } catch (err) {
+        console.error(err)
+        setError('Failed to send invite')
+      }
+      setLoading(false)
+    } else {
+      setStep('credentials')
     }
-    setStep('credentials')
   }
 
   async function handleSignup(e: React.FormEvent) {
@@ -72,6 +106,43 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
     setStep('verify')
   }
 
+  async function handleStaffSignup(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const res = await fetch('/api/auth/staff-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, role, code: inviteCode, password })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Failed to sign up')
+        setLoading(false)
+        return
+      }
+      
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (loginError) {
+        setError('Account created, but auto-login failed: ' + loginError.message)
+        setLoading(false)
+        return
+      }
+      
+      window.location.href = '/order'
+    } catch (err) {
+      console.error(err)
+      setError('Staff signup failed')
+      setLoading(false)
+    }
+  }
+
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -96,6 +167,10 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
 
       if (metadataRole) {
         await supabase.from('profiles').update({ role: metadataRole }).eq('id', user.id)
+
+        if (metadataRole === 'waiter' || metadataRole === 'cook' || metadataRole === 'manager') {
+          await supabase.from('invite_codes').update({ status: 'used' }).eq('code', inviteCode.trim())
+        }
       }
 
       const { data: profile } = await supabase
@@ -244,7 +319,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
 
         <form onSubmit={handleRoleStep} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            {(['customer', 'owner'] as UserRole[]).map((r) => (
+            {(['customer', 'owner', 'waiter', 'cook', 'manager'] as UserRole[]).map((r) => (
               <button
                 key={r}
                 type="button"
@@ -255,7 +330,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
                     : 'border-surface-border bg-surface text-gray-400 hover:border-gray-600'
                 }`}
               >
-                <div className="text-2xl mb-1">{r === 'customer' ? '🍽️' : '👨‍🍳'}</div>
+                <div className="text-2xl mb-1">{ROLE_ICONS[r]}</div>
                 <div className="font-medium capitalize">{r}</div>
               </button>
             ))}
@@ -263,14 +338,33 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
 
           {role === 'owner' && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Owner Invite Code</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Owner Invite Code
+              </label>
               <input
                 id="invite-code"
                 type="text"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all"
-                placeholder="Enter invite code"
+                placeholder="Enter owner invite code"
+              />
+            </div>
+          )}
+
+          {(role === 'waiter' || role === 'cook' || role === 'manager') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Staff Email
+              </label>
+              <input
+                id="staff-email-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all"
+                placeholder="you@example.com"
+                required
               />
             </div>
           )}
@@ -352,6 +446,64 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
     )
   }
 
+  // Step Staff Verify
+  if (step === 'staff-verify') {
+    return (
+      <div className="w-full max-w-md p-8 backdrop-blur-md bg-surface border border-surface-border rounded-card shadow-card relative z-10">
+        <button onClick={() => setStep('role')} className="text-gray-400 hover:text-white text-sm mb-6 flex items-center gap-1">
+          ← Back
+        </button>
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-bold text-white mb-2">Complete Staff Setup</h2>
+          <p className="text-gray-400">
+            We sent an invite code to <span className="text-indigo-400 font-medium">{email}</span>.
+          </p>
+        </div>
+
+        <form onSubmit={handleStaffSignup} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Invite Code</label>
+            <input
+              id="staff-invite-code"
+              type="text"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all text-center tracking-widest text-2xl font-mono"
+              placeholder="000000"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Set Password</label>
+            <input
+              id="staff-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-accent-indigo outline-none transition-all"
+              placeholder="Min. 6 characters"
+              minLength={6}
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">{error}</div>
+          )}
+
+          <button
+            id="staff-verify-submit"
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+          >
+            {loading ? 'Creating Account...' : 'Complete Signup'}
+          </button>
+        </form>
+      </div>
+    )
+  }
+
   // Step 3: Verify (OTP sent)
   return (
     <div className="w-full max-w-md p-8 backdrop-blur-md bg-surface border border-surface-border rounded-card shadow-card relative z-10">
@@ -403,3 +555,4 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
     </div>
   )
 }
+

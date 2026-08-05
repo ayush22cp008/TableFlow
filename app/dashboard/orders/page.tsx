@@ -36,6 +36,7 @@ export default function OrdersBoardPage() {
   const [bulkCategory, setBulkCategory] = useState('fire')
   const [bulkReason, setBulkReason] = useState('')
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([])
+  const [bulkError, setBulkError] = useState<string | null>(null)
 
   const fetchOrders = useCallback(async () => {
     const { data } = await supabase
@@ -107,15 +108,24 @@ export default function OrdersBoardPage() {
   // Submit Bulk Cancel
   async function submitBulkCancel(e: React.FormEvent) {
     e.preventDefault()
-    if (bulkMode === 'specific' && selectedOrderIds.length === 0) return
+    setBulkError(null)
+    if (bulkMode === 'specific' && selectedOrderIds.length === 0) {
+      setBulkError('Please select at least one order.')
+      return
+    }
 
     const payloadIds = bulkMode === 'all' ? null : selectedOrderIds
 
-    await supabase.rpc('cancel_active_orders', {
+    const { error } = await supabase.rpc('cancel_active_orders', {
       p_reason: bulkReason.trim() || null,
       p_category: bulkCategory,
       p_order_ids: payloadIds
     })
+
+    if (error) {
+      setBulkError(error.message || 'Failed to cancel orders. Check permissions or data.')
+      return
+    }
 
     setBulkModalOpen(false)
     setSelectedOrderIds([])
@@ -139,7 +149,7 @@ export default function OrdersBoardPage() {
           <h1 className="text-2xl font-bold">Live Orders</h1>
           {userRole === 'owner' && (
             <button 
-              onClick={() => { setBulkModalOpen(true); setSelectedOrderIds([]); setBulkMode('all') }}
+              onClick={() => { setBulkModalOpen(true); setSelectedOrderIds([]); setBulkMode('all'); setBulkError(null) }}
               className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-medium shadow flex items-center gap-2 transition"
             >
               ⚠️ Bulk Emergency Stop
@@ -265,10 +275,10 @@ export default function OrdersBoardPage() {
         </div>
       )}
 
-      {/* Bulk Cancel Modal (Owner) */}
+      {/* Bulk Cancel Panel (Owner) */}
       {bulkModalOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm px-4 pt-10">
-          <form onSubmit={submitBulkCancel} className="bg-red-950/40 border border-red-900/50 p-6 rounded-xl w-full max-w-xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 pointer-events-none">
+          <form onSubmit={submitBulkCancel} className="pointer-events-auto bg-red-950/95 backdrop-blur-md border border-red-900 shadow-2xl p-6 rounded-xl w-full relative max-h-[80vh] overflow-y-auto">
             <div className="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-white" onClick={() => setBulkModalOpen(false)}>✕</div>
             
             <h2 className="text-2xl font-bold text-red-500 mb-2">Bulk Emergency Stop</h2>
@@ -311,14 +321,20 @@ export default function OrdersBoardPage() {
                 <textarea
                   value={bulkReason}
                   onChange={e => setBulkReason(e.target.value)}
-                  rows={3}
+                  rows={2}
                   className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white outline-none resize-none"
                   placeholder="e.g. Kitchen evacuated, gas leak..."
                 />
               </div>
             </div>
 
-            <div className="flex justify-end mt-8">
+            {bulkError && (
+              <div className="mt-4 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm font-medium">
+                {bulkError}
+              </div>
+            )}
+
+            <div className="flex justify-end mt-6">
               <button 
                 type="submit" 
                 disabled={bulkMode === 'specific' && selectedOrderIds.length === 0}
