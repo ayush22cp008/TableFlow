@@ -33,6 +33,8 @@ export async function GET(request: Request) {
           
         if (profile?.role === 'owner' || metadataRole === 'owner') {
           return NextResponse.redirect(`${origin}/dashboard`)
+        } else if (profile?.role === 'cook' || metadataRole === 'cook') {
+          return NextResponse.redirect(`${origin}/dashboard/cook`)
         }
         return NextResponse.redirect(`${origin}/order`)
       }

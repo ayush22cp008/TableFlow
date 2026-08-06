@@ -62,7 +62,13 @@ export async function middleware(request: NextRequest) {
     // Logged-in user hitting /login or /signup → redirect to correct home
     if (pathname === '/login' || pathname === '/signup') {
       const url = request.nextUrl.clone()
-      url.pathname = role === 'owner' ? '/dashboard' : '/order'
+      if (role === 'owner') {
+        url.pathname = '/dashboard'
+      } else if (role === 'cook') {
+        url.pathname = '/dashboard/cook'
+      } else {
+        url.pathname = '/order'
+      }
       return NextResponse.redirect(url)
     }
   }
