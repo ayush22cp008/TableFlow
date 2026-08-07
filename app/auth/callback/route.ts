@@ -35,6 +35,8 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/dashboard`)
         } else if (profile?.role === 'cook' || metadataRole === 'cook') {
           return NextResponse.redirect(`${origin}/dashboard/cook`)
+        } else if (profile?.role === 'manager' || metadataRole === 'manager') {
+          return NextResponse.redirect(`${origin}/dashboard/manager`)
         }
         return NextResponse.redirect(`${origin}/order`)
       }

@@ -66,6 +66,8 @@ export async function middleware(request: NextRequest) {
         url.pathname = '/dashboard'
       } else if (role === 'cook') {
         url.pathname = '/dashboard/cook'
+      } else if (role === 'manager') {
+        url.pathname = '/dashboard/manager'
       } else {
         url.pathname = '/order'
       }
