@@ -23,6 +23,11 @@ export async function middleware(request: NextRequest) {
           )
         },
       },
+      global: {
+        fetch: (url, options) => {
+          return fetch(url, { ...options, cache: 'no-store' })
+        }
+      }
     }
   )
 

@@ -26,6 +26,11 @@ export function createClient() {
           }
         },
       },
+      global: {
+        fetch: (url, options) => {
+          return fetch(url, { ...options, cache: 'no-store' })
+        }
+      }
     }
   )
 }

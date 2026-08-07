@@ -7,11 +7,10 @@ export async function GET(request: Request) {
   
   if (code) {
     const supabase = createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
       // Get user to check metadata and profile
-      const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const metadataRole = user.user_metadata?.role
 
