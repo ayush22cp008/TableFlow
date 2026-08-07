@@ -73,7 +73,7 @@ export default function SelectRolePage() {
         return
       }
 
-      window.location.href = role === 'manager' ? '/dashboard' : role === 'cook' ? '/dashboard/cook' : '/order'
+      window.location.href = role === 'manager' ? '/dashboard/manager' : role === 'cook' ? '/dashboard/cook' : '/order'
       return
     }
 

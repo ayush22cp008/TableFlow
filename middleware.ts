@@ -59,6 +59,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
+    // Staff trying to access exact /dashboard → /dashboard/{role}
+    if ((role === 'manager' || role === 'cook' || role === 'waiter') && pathname === '/dashboard') {
+      const url = request.nextUrl.clone()
+      url.pathname = `/dashboard/${role}`
+      return NextResponse.redirect(url)
+    }
+
     // Logged-in user hitting /login or /signup → redirect to correct home
     if (pathname === '/login' || pathname === '/signup') {
       const url = request.nextUrl.clone()
