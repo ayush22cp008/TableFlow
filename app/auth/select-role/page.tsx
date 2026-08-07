@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { UserRole } from '@/types'
 import { OWNER_INVITE_CODE } from '@/components/AuthForm'
@@ -18,6 +18,25 @@ export default function SelectRolePage() {
   const [inviteCode, setInviteCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [sentRoles, setSentRoles] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) setUserEmail(user.email)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (userEmail && (role === 'waiter' || role === 'cook' || role === 'manager') && !sentRoles.has(role)) {
+      setSentRoles(prev => new Set(prev).add(role))
+      fetch('/api/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, role })
+      }).catch(console.error)
+    }
+  }, [role, userEmail, sentRoles])
 
   async function handleRoleStep(e: React.FormEvent) {
     e.preventDefault()
@@ -41,60 +60,24 @@ export default function SelectRolePage() {
     }
 
     if (role === 'waiter' || role === 'cook' || role === 'manager') {
-      // 1. Role tag check in the string
-      const tag = role === 'waiter' ? 'WT' : role === 'cook' ? 'CO' : 'MN'
-      if (!inviteCode.includes(tag)) {
-        setError('Invalid code format for the selected role.')
+      const res = await fetch('/api/auth/verify-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: inviteCode, role })
+      })
+      const data = await res.json()
+      
+      if (!res.ok) {
+        setError(data.error || 'Failed to verify invite code.')
         setLoading(false)
         return
       }
 
-      // Fetch code from DB
-      const { data: codeData, error: codeErr } = await supabase
-        .from('invite_codes')
-        .select('*')
-        .eq('code', inviteCode.trim())
-        .single()
-
-      if (codeErr || !codeData) {
-        setError('Invalid or unused invite code.')
-        setLoading(false)
-        return
-      }
-
-      if (codeData.status !== 'unused') {
-        setError('This invite code has already been used or is expired.')
-        setLoading(false)
-        return
-      }
-
-      // 2. Identity match
-      if (codeData.staff_email.toLowerCase() !== user.email.toLowerCase()) {
-        setError('This invite code is registered to a different email address.')
-        setLoading(false)
-        return
-      }
-
-      // 3. Role match
-      if (codeData.role !== role) {
-        setError('This invite code is not for the selected role.')
-        setLoading(false)
-        return
-      }
-
-      // Mark code as used
-      const { error: codeUpdateErr } = await supabase
-        .from('invite_codes')
-        .update({ status: 'used' })
-        .eq('id', codeData.id)
-
-      if (codeUpdateErr) {
-        setError('Failed to redeem invite code.')
-        setLoading(false)
-        return
-      }
+      window.location.href = role === 'manager' ? '/dashboard' : role === 'cook' ? '/dashboard/cook' : '/order'
+      return
     }
 
+    // For owner and customer (non-staff roles), continue with client-side update
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ role })
@@ -107,7 +90,7 @@ export default function SelectRolePage() {
     }
 
     // On success: redirect
-    window.location.href = (role === 'owner' || role === 'manager') ? '/dashboard' : '/order'
+    window.location.href = role === 'owner' ? '/dashboard' : '/order'
   }
 
   return (
