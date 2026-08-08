@@ -13,7 +13,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href={role === 'owner' ? '/dashboard' : role === 'manager' ? '/dashboard/manager' : '/'} className="flex items-center gap-2">
+          <Link href={role === 'owner' ? '/dashboard' : role === 'manager' ? '/dashboard/manager' : role === 'waiter' ? '/dashboard/waiter' : '/'} className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg text-sm">
               TF
             </div>
@@ -41,6 +41,13 @@ export default function Navbar() {
             {user && role === 'manager' && (
               <>
                 <Link href="/dashboard/manager" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Overview</Link>
+                <Link href="/dashboard/menu" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Menu</Link>
+                <Link href="/dashboard/tables" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Tables</Link>
+              </>
+            )}
+            {user && role === 'waiter' && (
+              <>
+                <Link href="/dashboard/waiter" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Overview</Link>
                 <Link href="/dashboard/menu" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Menu</Link>
                 <Link href="/dashboard/tables" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Tables</Link>
               </>

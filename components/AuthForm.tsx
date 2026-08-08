@@ -134,7 +134,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
         setLoading(false)
         return
       }
-      window.location.href = role === 'owner' ? '/dashboard' : role === 'cook' ? '/dashboard/cook' : role === 'manager' ? '/dashboard/manager' : '/order'
+      window.location.href = role === 'owner' ? '/dashboard' : role === 'cook' ? '/dashboard/cook' : role === 'manager' ? '/dashboard/manager' : role === 'waiter' ? '/dashboard/waiter' : '/order'
     } catch (err) {
       console.error(err)
       setError('Staff signup failed')
@@ -178,7 +178,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
         .eq('id', user.id)
         .single()
       const userRole = profile?.role || metadataRole || 'customer'
-      window.location.href = userRole === 'owner' ? '/dashboard' : userRole === 'cook' ? '/dashboard/cook' : userRole === 'manager' ? '/dashboard/manager' : '/order'
+      window.location.href = userRole === 'owner' ? '/dashboard' : userRole === 'cook' ? '/dashboard/cook' : userRole === 'manager' ? '/dashboard/manager' : userRole === 'waiter' ? '/dashboard/waiter' : '/order'
     } else {
       setError('Verification succeeded but failed to retrieve user.')
       setLoading(false)
@@ -212,7 +212,7 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
         .single()
       
       const userRole = profile?.role || 'customer'
-      window.location.href = userRole === 'owner' ? '/dashboard' : userRole === 'cook' ? '/dashboard/cook' : userRole === 'manager' ? '/dashboard/manager' : '/order'
+      window.location.href = userRole === 'owner' ? '/dashboard' : userRole === 'cook' ? '/dashboard/cook' : userRole === 'manager' ? '/dashboard/manager' : userRole === 'waiter' ? '/dashboard/waiter' : '/order'
     }
   }
 
