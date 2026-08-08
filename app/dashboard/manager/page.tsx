@@ -23,12 +23,14 @@ export default function ManagerDashboardPage() {
       .from('orders')
       .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number)')
       .eq('status', 'placed')
+      .order('is_priority', { ascending: false })
       .order('created_at', { ascending: true })
 
     const { data: servedData } = await supabase
       .from('orders')
       .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number)')
       .eq('status', 'served')
+      .order('is_priority', { ascending: false })
       .order('created_at', { ascending: true })
     
     setPlacedOrders(placedData ?? [])
