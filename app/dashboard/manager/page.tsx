@@ -35,16 +35,20 @@ export default function ManagerDashboardPage() {
     setServedOrders(servedData ?? [])
     
     // Initialize payment methods for served orders if not already set
-    const initialMethods = { ...paymentMethods }
-    servedData?.forEach(order => {
-      if (!initialMethods[order.id]) {
-        initialMethods[order.id] = 'cash'
-      }
+    setPaymentMethods(prev => {
+      let changed = false
+      const next = { ...prev }
+      servedData?.forEach(order => {
+        if (!next[order.id]) {
+          next[order.id] = 'cash'
+          changed = true
+        }
+      })
+      return changed ? next : prev
     })
-    setPaymentMethods(initialMethods)
     
     setLoading(false)
-  }, [paymentMethods])
+  }, [])
 
   useEffect(() => {
     fetchOrders()
