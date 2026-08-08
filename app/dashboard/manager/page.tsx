@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import { Order } from '@/types'
+import { formatOrderNumber } from '@/lib/utils'
 
 type ManagerOrder = Order & {
   order_items: { quantity: number; unit_price: number; menu_items: { name: string } }[]
@@ -149,7 +150,7 @@ export default function ManagerDashboardPage() {
                   <div key={order.id} className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-lg">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <div className="text-lg font-bold text-white">Order #{order.id.slice(0, 6)}</div>
+                        <div className="text-lg font-bold text-white">Order {formatOrderNumber(order)}</div>
                         {order.restaurant_tables?.table_number && (
                           <div className="text-indigo-400 font-medium">Table {order.restaurant_tables.table_number}</div>
                         )}
@@ -197,7 +198,7 @@ export default function ManagerDashboardPage() {
                     <div key={order.id} className="bg-gray-900/80 border border-gray-800 rounded-xl p-6 shadow-lg print-break-inside-avoid print-bg-white print-border-black print-shadow-none print:mb-8 print:p-0">
                       <div className="text-center mb-6 pb-4 border-b border-gray-800 print-border-black">
                         <h3 className="text-xl font-bold text-white print-text-black">TableFlow Receipt</h3>
-                        <div className="text-gray-400 print-text-black">Order #{order.id.slice(0, 8)}</div>
+                        <div className="text-gray-400 print-text-black">Order {formatOrderNumber(order)}</div>
                         {order.restaurant_tables?.table_number && (
                           <div className="text-indigo-400 font-medium font-mono text-lg mt-1 print-text-black">Table {order.restaurant_tables.table_number}</div>
                         )}
