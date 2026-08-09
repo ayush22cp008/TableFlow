@@ -59,18 +59,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Owners only' }, { status: 403 })
     }
 
-    // 3. Deactivate the staff member and downgrade role to customer
-    // Note: We previously applied a permanent ban here. This has been removed.
-
-    // Note: the profiles.is_active flag should be set to false from the client
-    // immediately prior to calling this API, or we could also do it here.
-    const { error: updateError } = await supabaseAdmin
+    // 3. Fully delete the staff member (Hard Delete)
+    // First, delete the public.profiles row to avoid foreign key constraints
+    // (in case ON DELETE CASCADE is not set up on the auth.users reference)
+    const { error: profileDeleteError } = await supabaseAdmin
       .from('profiles')
-      .update({ is_active: false, is_logged_in: false, role: 'customer' })
+      .delete()
       .eq('id', userId)
 
-    if (updateError) {
-      console.error('Profile update error:', updateError)
+    if (profileDeleteError) {
+      console.error('Profile delete error:', profileDeleteError)
+      return NextResponse.json({ error: 'Failed to delete user profile' }, { status: 500 })
+    }
+
+    // 4. Delete the user from Supabase Auth
+    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+
+    if (authDeleteError) {
+      console.error('Auth user delete error:', authDeleteError)
+      return NextResponse.json({ error: 'Failed to delete auth user' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
