@@ -50,10 +50,17 @@ export default function TablesPage() {
   const [reservationTime, setReservationTime] = useState('')
 
   const fetchData = useCallback(async () => {
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
     const [{ data: t }, { data: w }, { data: r }, { data: o }] = await Promise.all([
       supabase.from('restaurant_tables').select('*').order('table_number'),
       supabase.from('waitlist').select('*').eq('status', 'waiting').order('joined_at'),
-      supabase.from('reservation_requests').select('*').in('status', ['pending', 'approved', 'completed']).order('requested_time'),
+      supabase.from('reservation_requests')
+        .select('*')
+        .in('status', ['pending', 'approved', 'completed'])
+        .gte('requested_time', startOfToday.toISOString())
+        .order('requested_time'),
       supabase.from('orders').select('*')
     ])
     setTables((t as RestaurantTable[]) ?? [])
@@ -233,6 +240,14 @@ export default function TablesPage() {
           const orderTime = new Date(order.created_at).getTime()
           return orderTime >= requestedTime - 30 * 60 * 1000 && orderTime <= requestedTime + 30 * 60 * 1000
         })
+
+      if (req.status === 'completed') {
+        if (linkedOrder) {
+          const seatedTime = new Date(linkedOrder.created_at).getTime()
+          return now <= seatedTime + 5 * 60 * 1000
+        }
+        return now <= requestedTime + 5 * 60 * 1000
+      }
 
       if (linkedOrder) {
         if (linkedOrder.status === 'billed') {
