@@ -40,27 +40,59 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Create the user using Supabase Admin SDK (auto confirms email)
-    const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { role }
-    })
+    // 2. Check if user already exists (Re-activation flow)
+    const { data: existingProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('email', email.trim().toLowerCase())
+      .single()
 
-    if (createUserError) {
-      console.error('Create user error:', createUserError)
-      return NextResponse.json(
-        { error: createUserError.message },
-        { status: 500 }
-      )
-    }
+    let userId: string
 
-    // Wait, the profiles table needs to be updated. Since there's a trigger for profile creation,
-    // we should just update the role in the profiles table, or maybe the trigger handles user_metadata.
-    // Let's explicitly update the profile table to be safe, just like the client flow does.
-    if (userData?.user?.id) {
-      await supabaseAdmin.from('profiles').update({ role }).eq('id', userData.user.id)
+    if (existingProfile) {
+      // Re-activate existing user
+      userId = existingProfile.id
+
+      // Update profile
+      const { error: updateProfileError } = await supabaseAdmin
+        .from('profiles')
+        .update({ role, is_active: true, is_logged_in: false })
+        .eq('id', userId)
+
+      if (updateProfileError) {
+        console.error('Update profile error:', updateProfileError)
+        return NextResponse.json({ error: 'Failed to reactivate user profile' }, { status: 500 })
+      }
+
+      // Update auth.users metadata
+      const { error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: { role }
+      })
+
+      if (updateAuthError) {
+        console.error('Update auth user error:', updateAuthError)
+      }
+    } else {
+      // Create new user using Supabase Admin SDK (auto confirms email)
+      const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { role }
+      })
+
+      if (createUserError) {
+        console.error('Create user error:', createUserError)
+        return NextResponse.json(
+          { error: createUserError.message },
+          { status: 500 }
+        )
+      }
+
+      userId = userData.user.id
+
+      // Update the profile table explicitly
+      await supabaseAdmin.from('profiles').update({ role }).eq('id', userId)
     }
 
     // 3. Mark the invite code as used
@@ -69,7 +101,7 @@ export async function POST(request: Request) {
       .update({ status: 'used' })
       .eq('code', code.trim())
 
-    return NextResponse.json({ success: true, user: userData.user })
+    return NextResponse.json({ success: true, userId })
 
   } catch (err) {
     console.error('Staff signup error:', err)

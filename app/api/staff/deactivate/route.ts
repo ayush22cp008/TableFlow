@@ -59,22 +59,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Owners only' }, { status: 403 })
     }
 
-    // 3. Deactivate (ban) the staff member
-    // Note: We use 876000h (100 years) as a permanent ban.
-    const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      ban_duration: '876000h'
-    })
-
-    if (banError) {
-      console.error('Ban error:', banError)
-      return NextResponse.json({ error: 'Failed to ban user in Auth' }, { status: 500 })
-    }
+    // 3. Deactivate the staff member and downgrade role to customer
+    // Note: We previously applied a permanent ban here. This has been removed.
 
     // Note: the profiles.is_active flag should be set to false from the client
     // immediately prior to calling this API, or we could also do it here.
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({ is_active: false, is_logged_in: false })
+      .update({ is_active: false, is_logged_in: false, role: 'customer' })
       .eq('id', userId)
 
     if (updateError) {

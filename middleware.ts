@@ -48,14 +48,20 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user) {
-    // Fetch role for role-based redirect
+    // Fetch role and is_active for role-based redirect
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, is_active')
       .eq('id', user.id)
       .single()
 
-    const role = profile?.role ?? 'customer'
+    let role = profile?.role ?? 'customer'
+    const isActive = profile?.is_active ?? true
+
+    // If deactivated, forcefully treat them as a customer to block staff access
+    if (!isActive) {
+      role = 'customer'
+    }
 
     // Customer trying to access /dashboard → /order
     if (role === 'customer' && pathname.startsWith('/dashboard')) {
