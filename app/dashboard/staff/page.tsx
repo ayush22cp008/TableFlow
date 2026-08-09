@@ -9,6 +9,7 @@ import Navbar from '@/components/Navbar'
 type StaffDetail = UserProfile & {
   staff_name?: string
   last_login?: string
+  is_logged_in?: boolean
 }
 
 export default function StaffManagementPage() {
@@ -54,7 +55,7 @@ export default function StaffManagementPage() {
     // Fetch Active Staff Profiles
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, email, role, created_at, last_login, is_active')
+      .select('id, email, role, created_at, last_login, is_active, is_logged_in')
       .in('role', ['waiter', 'cook', 'manager'])
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -221,9 +222,7 @@ export default function StaffManagementPage() {
                   <tr><td colSpan={6} className="p-4 text-center text-gray-400">No active staff members found.</td></tr>
                 ) : (
                   staffList.map(staff => {
-                    const isRecentlyActive = staff.last_login 
-                      ? (Date.now() - new Date(staff.last_login).getTime() <= 48 * 60 * 60 * 1000)
-                      : false
+                    const isActive = staff.is_logged_in
 
                     return (
                       <tr key={staff.id} className="text-sm hover:bg-gray-800/30 transition-colors">
@@ -238,7 +237,7 @@ export default function StaffManagementPage() {
                           {new Date(staff.created_at).toLocaleDateString()}
                         </td>
                         <td className="p-4">
-                          {isRecentlyActive ? (
+                          {isActive ? (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                               Active

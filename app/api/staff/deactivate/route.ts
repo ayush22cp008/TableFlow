@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     // immediately prior to calling this API, or we could also do it here.
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({ is_active: false })
+      .update({ is_active: false, is_logged_in: false })
       .eq('id', userId)
 
     if (updateError) {

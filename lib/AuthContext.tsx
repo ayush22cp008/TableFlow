@@ -79,6 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = async () => {
+    if (user) {
+      await supabase.from('profiles').update({ is_logged_in: false }).eq('id', user.id)
+    }
     await supabase.auth.signOut()
     setProfile(null)
     setRole(null)
