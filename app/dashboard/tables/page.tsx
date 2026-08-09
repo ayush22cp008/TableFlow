@@ -109,6 +109,27 @@ export default function TablesPage() {
 
   async function approveRequest(req: ReservationRequest, tableId: string) {
     if (!tableId) { window.alert('Select a table first'); return }
+
+    const targetTable = tables.find(t => t.id === tableId)
+    if (!targetTable) { window.alert('Invalid table'); return }
+    
+    // Occupancy check
+    if ((targetTable.capacity - (targetTable.occupied_seats || 0)) < req.party_size) {
+      window.alert('Not enough available seats on this table.')
+      return
+    }
+
+    // Overlap check
+    const hasOverlap = reservationRequests.some(r => 
+      r.status === 'approved' && 
+      r.table_id === tableId && 
+      r.id !== req.id
+    )
+    if (hasOverlap) {
+      window.alert('This table already has an active reservation assigned.')
+      return
+    }
+
     const uniqueCode = Math.floor(100000 + Math.random() * 900000).toString()
     
     const { error: reqErr } = await supabase.from('reservation_requests')
@@ -313,8 +334,8 @@ export default function TablesPage() {
                       className="w-full px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white outline-none"
                     >
                       <option value="">Select Table...</option>
-                      {tables.filter(t => t.capacity >= req.party_size).map(t => (
-                        <option key={t.id} value={t.id}>Table {t.table_number} (Seats {t.capacity})</option>
+                      {tables.filter(t => (t.capacity - (t.occupied_seats || 0)) >= req.party_size).map(t => (
+                        <option key={t.id} value={t.id}>Table {t.table_number} (Seats {t.capacity - (t.occupied_seats || 0)} available)</option>
                       ))}
                     </select>
                   </div>
