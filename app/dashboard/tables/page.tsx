@@ -97,6 +97,12 @@ export default function TablesPage() {
   }
 
   async function clearReservation(table: RestaurantTable) {
+    // 1. Mark related approved reservation requests as cancelled
+    await supabase.from('reservation_requests')
+      .update({ status: 'cancelled' })
+      .eq('table_id', table.id)
+      .eq('status', 'approved')
+
     const { error } = await supabase.from('restaurant_tables').update({ reserved_from: null }).eq('id', table.id)
     if (error) {
       window.alert('Failed to clear reservation: ' + error.message)

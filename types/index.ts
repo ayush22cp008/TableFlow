@@ -21,7 +21,7 @@ export type ReservationRequest = {
   customer_name: string
   party_size: number
   requested_time: string
-  status: 'pending' | 'approved' | 'rejected' | 'arrived' | 'completed'
+  status: 'pending' | 'approved' | 'rejected' | 'arrived' | 'completed' | 'cancelled'
   unique_code: string | null
   table_id: string | null
   created_at: string
