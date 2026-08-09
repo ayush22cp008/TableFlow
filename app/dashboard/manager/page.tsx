@@ -68,11 +68,7 @@ export default function ManagerDashboardPage() {
 
   async function markPaid(orderId: string) {
     const method = paymentMethods[orderId] || 'cash'
-    await supabase.from('orders').update({ 
-      status: 'billed',
-      payment_method: method,
-      updated_at: new Date().toISOString() 
-    }).eq('id', orderId)
+    await supabase.rpc('mark_order_paid', { p_order_id: orderId, p_payment_method: method })
     
     fetchOrders()
   }
