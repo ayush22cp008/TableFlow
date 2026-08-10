@@ -26,6 +26,7 @@ export default function Navbar() {
               <>
                 <Link href="/order" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Menu</Link>
                 <Link href="/order/my-orders" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">My Orders</Link>
+                <Link href="/order/reservation" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Reservation</Link>
               </>
             )}
             {user && role === 'owner' && (

@@ -99,12 +99,6 @@ export default function OrderPage() {
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-white">Menu</h1>
             <p className="text-gray-400 text-sm mt-0.5">Fresh items, updated in real time</p>
-            <Link
-              href="/reserve"
-              className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-indigo-400 border border-indigo-500/40 hover:bg-indigo-500/10 hover:text-indigo-300 transition-all"
-            >
-              📅 Reserve a Table
-            </Link>
           </div>
           {cartCount > 0 && (
             <Link

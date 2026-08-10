@@ -7,25 +7,26 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthContext'
-import { Order } from '@/types'
 import Navbar from '@/components/Navbar'
+import { formatOrderNumber } from '@/lib/utils'
 import OrderStatusBadge from '@/components/OrderStatusBadge'
 import FeedbackButtons from '@/components/FeedbackButtons'
 import { PageLoader } from '@/components/LoadingSpinner'
 
 export default function MyOrdersPage() {
   const { user, loading: authLoading } = useAuth()
-  const [orders, setOrders] = useState<Order[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchOrders = useCallback(async () => {
     if (!user) return
     const { data } = await supabase
       .from('orders')
-      .select('*')
+      .select('*, restaurant_tables(table_number)')
       .eq('customer_id', user.id)
       .order('created_at', { ascending: false })
-    setOrders((data as Order[]) ?? [])
+    setOrders(data || [])
     setLoading(false)
   }, [user])
 
@@ -61,8 +62,15 @@ export default function MyOrdersPage() {
               <div key={order.id} className="p-5 bg-surface border border-surface-border rounded-card shadow-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500 font-mono">{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-400">{new Date(order.created_at).toLocaleString()}</p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-lg font-bold text-white">Order {formatOrderNumber(order)}</p>
+                      {order.restaurant_tables?.table_number && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700">
+                          Table {order.restaurant_tables.table_number}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-1">{new Date(order.created_at).toLocaleString()}</p>
                   </div>
                   <OrderStatusBadge status={order.status} />
                 </div>
