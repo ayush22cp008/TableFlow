@@ -177,6 +177,18 @@ export default function StaffManagementPage() {
     alert(`${staffName} has been deactivated.`)
   }
 
+  async function handleDeleteInviteCode(codeId: string, codeStr: string) {
+    if (!confirm(`Are you sure you want to delete invite code ${codeStr}?`)) {
+      return
+    }
+    const { error } = await supabase.from('invite_codes').delete().eq('id', codeId)
+    if (error) {
+      alert(`Error deleting code: ${error.message}`)
+    } else {
+      fetchData()
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -373,25 +385,33 @@ export default function StaffManagementPage() {
                         </span>
                       </td>
                       <td className="p-4">
-                        {c.status === 'unused' && (
-                          editingId === c.id ? (
-                            <div className="flex gap-3">
-                              <button onClick={() => handleSaveEdit(c.id)} className="text-green-400 hover:text-green-300 font-medium transition-colors">Save</button>
-                              <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-300 transition-colors">Cancel</button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setEditingId(c.id);
-                                setEditName(c.staff_name);
-                                setEditEmail(c.staff_email);
-                              }}
-                              className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
-                            >
-                              Edit
-                            </button>
-                          )
-                        )}
+                        <div className="flex gap-3 items-center">
+                          {c.status === 'unused' && (
+                            editingId === c.id ? (
+                              <>
+                                <button onClick={() => handleSaveEdit(c.id)} className="text-green-400 hover:text-green-300 font-medium transition-colors">Save</button>
+                                <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-300 transition-colors">Cancel</button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingId(c.id);
+                                  setEditName(c.staff_name);
+                                  setEditEmail(c.staff_email);
+                                }}
+                                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                              >
+                                Edit
+                              </button>
+                            )
+                          )}
+                          <button
+                            onClick={() => handleDeleteInviteCode(c.id, c.code)}
+                            className="text-red-400 hover:text-red-300 font-medium transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
