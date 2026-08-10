@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { Resend } from 'resend'
 
+const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(request: Request) {
   try {
     const { email, role, code, password } = await request.json()
@@ -100,6 +102,30 @@ export async function POST(request: Request) {
       .from('invite_codes')
       .update({ status: 'used' })
       .eq('code', code.trim())
+
+    // 4. Send welcome email
+    try {
+      await resend.emails.send({
+        from: 'TableFlow Staff System <noreply@tableflow.systems>',
+        to: [email.trim().toLowerCase()],
+        subject: 'Welcome to TableFlow!',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #4F46E5;">Welcome to TableFlow!</h2>
+            <p>Congratulations!</p>
+            <p>Your staff account has been successfully created.</p>
+            <p>You are now registered with the role of <strong>${role}</strong>.</p>
+            <p>You can now log in using your email and the password you just created.</p>
+            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+              This is an automated message from the TableFlow system.
+            </p>
+          </div>
+        `,
+      })
+    } catch (emailErr) {
+      console.error('Failed to send welcome email:', emailErr)
+      // Continue without blocking signup
+    }
 
     return NextResponse.json({ success: true, userId })
 

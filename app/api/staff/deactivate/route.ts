@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   try {
@@ -57,6 +60,33 @@ export async function POST(request: Request) {
 
     if (profileError || !profile || profile.role !== 'owner') {
       return NextResponse.json({ error: 'Forbidden: Owners only' }, { status: 403 })
+    }
+
+    // 2.5. Send deactivation email
+    try {
+      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
+      if (!userError && userData?.user?.email) {
+        const staffEmail = userData.user.email
+        await resend.emails.send({
+          from: 'TableFlow Staff System <noreply@tableflow.systems>',
+          to: [staffEmail],
+          subject: 'Your TableFlow staff access has been removed',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+              <h2 style="color: #4F46E5;">TableFlow Access Removed</h2>
+              <p>Hello,</p>
+              <p>Your staff access for TableFlow has been removed.</p>
+              <p>If you believe this is a mistake or if this is unexpected, please contact your restaurant owner or manager.</p>
+              <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                This is an automated message from the TableFlow system.
+              </p>
+            </div>
+          `,
+        })
+      }
+    } catch (emailErr) {
+      console.error('Failed to send deactivation email:', emailErr)
+      // Continue without blocking deactivation
     }
 
     // 3. Fully delete the staff member (Hard Delete)
