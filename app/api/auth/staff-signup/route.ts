@@ -105,7 +105,7 @@ export async function POST(request: Request) {
 
     // 4. Send welcome email
     try {
-      await resend.emails.send({
+      const { error: emailError } = await resend.emails.send({
         from: 'TableFlow Staff System <noreply@tableflow.systems>',
         to: [email.trim().toLowerCase()],
         subject: 'Welcome to TableFlow!',
@@ -122,6 +122,9 @@ export async function POST(request: Request) {
           </div>
         `,
       })
+      if (emailError) {
+        console.error('[welcome-email] Resend error:', emailError)
+      }
     } catch (emailErr) {
       console.error('Failed to send welcome email:', emailErr)
       // Continue without blocking signup

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { UserRole } from '@/types'
 import { OWNER_INVITE_CODE } from '@/components/AuthForm'
@@ -19,7 +19,7 @@ export default function SelectRolePage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [sentRoles, setSentRoles] = useState<Set<string>>(new Set())
+  const sentRolesRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -28,15 +28,15 @@ export default function SelectRolePage() {
   }, [])
 
   useEffect(() => {
-    if (userEmail && (role === 'waiter' || role === 'cook' || role === 'manager') && !sentRoles.has(role)) {
-      setSentRoles(prev => new Set(prev).add(role))
+    if (userEmail && (role === 'waiter' || role === 'cook' || role === 'manager') && !sentRolesRef.current.has(role)) {
+      sentRolesRef.current.add(role)
       fetch('/api/send-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, role })
       }).catch(console.error)
     }
-  }, [role, userEmail, sentRoles])
+  }, [role, userEmail])
 
   async function handleRoleStep(e: React.FormEvent) {
     e.preventDefault()

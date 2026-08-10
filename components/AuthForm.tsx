@@ -374,7 +374,8 @@ export function AuthForm({ view }: { view: 'login' | 'signup' }) {
           <button
             id="role-next"
             type="submit"
-            className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02]"
+            disabled={loading}
+            className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
           >
             Continue
           </button>
