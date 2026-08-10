@@ -66,8 +66,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to reactivate user profile' }, { status: 500 })
       }
 
-      // Update auth.users metadata
+      // Update auth.users metadata and password
       const { error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: password,
         user_metadata: { role }
       })
 

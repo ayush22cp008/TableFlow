@@ -19,9 +19,15 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/auth/select-role`)
         }
 
-        // Ensure profiles table has the correct role (crucial for owners)
-        if (metadataRole) {
-          await supabase.from('profiles').update({ role: metadataRole }).eq('id', user.id)
+        // Check if there's any pending unused invite code for this email
+        const { data: pendingInvites } = await supabase
+          .from('invite_codes')
+          .select('id')
+          .eq('staff_email', user.email)
+          .eq('status', 'unused')
+          
+        if (pendingInvites && pendingInvites.length > 0) {
+          return NextResponse.redirect(`${origin}/auth/select-role`)
         }
 
         const { data: profile } = await supabase
@@ -30,13 +36,13 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single()
           
-        if (profile?.role === 'owner' || metadataRole === 'owner') {
+        if (profile?.role === 'owner') {
           return NextResponse.redirect(`${origin}/dashboard`)
-        } else if (profile?.role === 'cook' || metadataRole === 'cook') {
+        } else if (profile?.role === 'cook') {
           return NextResponse.redirect(`${origin}/dashboard/cook`)
-        } else if (profile?.role === 'manager' || metadataRole === 'manager') {
+        } else if (profile?.role === 'manager') {
           return NextResponse.redirect(`${origin}/dashboard/manager`)
-        } else if (profile?.role === 'waiter' || metadataRole === 'waiter') {
+        } else if (profile?.role === 'waiter') {
           return NextResponse.redirect(`${origin}/dashboard/waiter`)
         }
         return NextResponse.redirect(`${origin}/order`)
