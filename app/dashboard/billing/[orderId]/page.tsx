@@ -12,6 +12,7 @@ import Navbar from '@/components/Navbar'
 import OrderStatusBadge from '@/components/OrderStatusBadge'
 import { PageLoader } from '@/components/LoadingSpinner'
 import { useParams, useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/AuthContext'
 
 const SERVICE_CHARGE_RATE = 0.10  // 10%
 
@@ -23,6 +24,8 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true)
   const [serviceCharge, setServiceCharge] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const { role } = useAuth()
+
 
   useEffect(() => {
     if (!orderId || orderId === 'demo') {
@@ -81,6 +84,18 @@ export default function BillingPage() {
     
     setGenerating(false)
     router.push('/dashboard/orders')
+  }
+
+  if (role === 'owner') {
+    return (
+      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
+        <div className="text-center p-8 bg-surface border border-surface-border rounded-xl shadow-xl max-w-md w-full">
+          <div className="text-6xl mb-4">🚫</div>
+          <h1 className="text-2xl font-bold text-white mb-2">Access Restricted</h1>
+          <p className="text-gray-400">Billing operations are now exclusively handled by Managers.</p>
+        </div>
+      </div>
+    )
   }
 
   if (loading) return <PageLoader />

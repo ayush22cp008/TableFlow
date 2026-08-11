@@ -285,32 +285,34 @@ export default function TablesPage() {
                 return (
                   <div
                     key={table.id}
-                    className={`p-5 rounded-xl border-2 transition-all text-center hover:scale-105 cursor-pointer flex flex-col items-center ${colorClasses}`}
-                    onClick={() => cycleTableStatus(table)}
+                    className={`p-5 rounded-xl border-2 transition-all text-center ${role === 'manager' ? 'hover:scale-105 cursor-pointer' : ''} flex flex-col items-center ${colorClasses}`}
+                    onClick={() => role === 'manager' && cycleTableStatus(table)}
                   >
                     <div className="text-3xl mb-1">🪑</div>
                     <div className="font-bold text-lg">Table {table.table_number}</div>
                     <div className="text-sm opacity-80">Seats {table.capacity}</div>
                     <div className="text-xs font-bold text-indigo-300 mt-0.5">{table.occupied_seats || 0}/{table.capacity} seated</div>
                     <div className="text-xs mt-1 font-medium">{label}</div>
-                    <div className="text-xs opacity-60 mt-0.5">Click to toggle reserved</div>
+                    {role === 'manager' && <div className="text-xs opacity-60 mt-0.5">Click to toggle reserved</div>}
 
-                    <div className="flex gap-2 mt-3 w-full" onClick={e => e.stopPropagation()}>
-                      <button 
-                        onClick={() => setShowReserveTable(table)}
-                        className="flex-1 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
-                      >
-                        Reserve
-                      </button>
-                      {table.reserved_from && (
+                    {role === 'manager' && (
+                      <div className="flex gap-2 mt-3 w-full" onClick={e => e.stopPropagation()}>
                         <button 
-                          onClick={() => clearReservation(table)}
-                          className="flex-1 py-1.5 text-xs bg-red-900/50 hover:bg-red-800 text-red-200 rounded-lg"
+                          onClick={() => setShowReserveTable(table)}
+                          className="flex-1 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
                         >
-                          Clear
+                          Reserve
                         </button>
-                      )}
-                    </div>
+                        {table.reserved_from && (
+                          <button 
+                            onClick={() => clearReservation(table)}
+                            className="flex-1 py-1.5 text-xs bg-red-900/50 hover:bg-red-800 text-red-200 rounded-lg"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -332,10 +334,12 @@ export default function TablesPage() {
                   </div>
                   <p className="text-sm text-gray-400">Party of {entry.party_size}{entry.phone && ` • ${entry.phone}`}</p>
                   <p className="text-xs text-gray-500 mb-3">{new Date(entry.joined_at).toLocaleTimeString()}</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => seatWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg">Seat</button>
-                    <button onClick={() => cancelWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-lg">Cancel</button>
-                  </div>
+                  {role === 'manager' && (
+                    <div className="flex gap-2">
+                      <button onClick={() => seatWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg">Seat</button>
+                      <button onClick={() => cancelWaitlistEntry(entry)} className="flex-1 py-1.5 text-xs bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-lg">Cancel</button>
+                    </div>
+                  )}
                 </div>
               ))}
               {waitlist.length === 0 && <p className="text-gray-400 text-sm">No one waiting right now.</p>}

@@ -216,7 +216,7 @@ export default function OrdersBoardPage() {
                           ))}
                         </ul>
 
-                        {!bulkModalOpen && (
+                        {!bulkModalOpen && userRole !== 'owner' && (
                           <div className="flex gap-1.5">
                             {NEXT_STATUS[status] && (
                               <button onClick={(e) => { e.stopPropagation(); advanceStatus(order) }} className="flex-1 py-1 text-xs bg-accent-indigo hover:bg-accent-indigo-hover text-white rounded-md">
