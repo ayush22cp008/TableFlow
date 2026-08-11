@@ -26,7 +26,6 @@ export default function DashboardPage() {
             { href: '/dashboard/menu',     icon: '🍽️', label: 'Menu Management',  desc: 'Add items, toggle availability, soft delete' },
             { href: '/dashboard/tables',   icon: '🪑', label: 'Tables & Waitlist', desc: 'Manage table status and seat waiting customers' },
             { href: '/dashboard/staff',    icon: '👥', label: 'Staff Management',  desc: 'Generate invite codes, manage staff accounts' },
-            { href: '/dashboard/billing/demo', icon: '🧾', label: 'Billing',       desc: 'Generate itemized bills with optional service charge' },
             { href: '/dashboard/analytics',icon: '📊', label: 'Analytics',         desc: "Today's revenue, top dishes, 7-day trend" },
             { href: '/dashboard/insights', icon: '🤖', label: 'AI Insights',       desc: 'Gemini-powered prep forecasts and dish classification' },
           ].map((card) => (
