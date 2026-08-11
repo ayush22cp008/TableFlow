@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { RestaurantTable, WaitlistEntry, ReservationRequest, Order } from '@/types'
 import Navbar from '@/components/Navbar'
 import { PageLoader } from '@/components/LoadingSpinner'
+import { useAuth } from '@/lib/AuthContext'
 
 
 
@@ -37,6 +38,7 @@ function getTableDisplay(table: RestaurantTable) {
 }
 
 export default function TablesPage() {
+  const { role } = useAuth()
   const [tables, setTables] = useState<RestaurantTable[]>([])
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
   const [reservationRequests, setReservationRequests] = useState<ReservationRequest[]>([])
@@ -349,21 +351,25 @@ export default function TablesPage() {
                     <h3 className="font-bold">{req.customer_name}</h3>
                     <p className="text-sm text-gray-400">Party of {req.party_size} • {new Date(req.requested_time).toLocaleString()}</p>
                   </div>
-                  <div className="mb-3">
-                    <select
-                      onChange={(e) => setCodeInputs({ ...codeInputs, [req.id + '_table']: e.target.value })}
-                      className="w-full px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white outline-none"
-                    >
-                      <option value="">Select Table...</option>
-                      {tables.filter(t => (t.capacity - (t.occupied_seats || 0)) >= req.party_size).map(t => (
-                        <option key={t.id} value={t.id}>Table {t.table_number} (Seats {t.capacity - (t.occupied_seats || 0)} available)</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => approveRequest(req, codeInputs[req.id + '_table'])} className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg">Approve</button>
-                    <button onClick={() => rejectRequest(req)} className="flex-1 py-1.5 text-xs bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-lg">Reject</button>
-                  </div>
+                  {role === 'manager' && (
+                    <>
+                      <div className="mb-3">
+                        <select
+                          onChange={(e) => setCodeInputs({ ...codeInputs, [req.id + '_table']: e.target.value })}
+                          className="w-full px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white outline-none"
+                        >
+                          <option value="">Select Table...</option>
+                          {tables.filter(t => (t.capacity - (t.occupied_seats || 0)) >= req.party_size).map(t => (
+                            <option key={t.id} value={t.id}>Table {t.table_number} (Seats {t.capacity - (t.occupied_seats || 0)} available)</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => approveRequest(req, codeInputs[req.id + '_table'])} className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg">Approve</button>
+                        <button onClick={() => rejectRequest(req)} className="flex-1 py-1.5 text-xs bg-transparent hover:bg-surface border border-surface-border text-text-secondary rounded-lg">Reject</button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
 
