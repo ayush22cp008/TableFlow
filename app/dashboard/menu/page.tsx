@@ -89,6 +89,18 @@ export default function MenuManagementPage() {
     fetchItems()
   }
 
+  if (role !== 'owner') {
+    return (
+      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
+        <div className="text-center p-8 bg-surface border border-surface-border rounded-xl shadow-xl max-w-md w-full">
+          <div className="text-6xl mb-4">🚫</div>
+          <h1 className="text-2xl font-bold text-white mb-2">Access Restricted</h1>
+          <p className="text-gray-400">Menu operations are exclusively handled by Owners.</p>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) return <PageLoader />
 
   return (

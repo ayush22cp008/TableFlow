@@ -43,7 +43,6 @@ export default function Navbar() {
             {user && role === 'manager' && (
               <>
                 <Link href="/dashboard/manager" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Overview</Link>
-                <Link href="/dashboard/menu" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Menu</Link>
                 <Link href="/dashboard/tables" className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">Tables</Link>
               </>
             )}
