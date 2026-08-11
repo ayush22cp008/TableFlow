@@ -13,10 +13,12 @@ import { supabase } from '@/lib/supabase'
 import { MenuItem } from '@/types'
 import Navbar from '@/components/Navbar'
 import { PageLoader } from '@/components/LoadingSpinner'
+import { useAuth } from '@/lib/AuthContext'
 
 const EMPTY_FORM = { name: '', description: '', price: '', category: 'general', image_url: '' }
 
 export default function MenuManagementPage() {
+  const { role } = useAuth()
   const [items, setItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -112,16 +114,18 @@ export default function MenuManagementPage() {
               </div>
               <div className="flex items-center gap-2">
                 {/* Availability toggle */}
-                <button
-                  onClick={() => toggleAvailability(item)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
-                    item.is_available
-                      ? 'bg-green-500/10 border-green-500/40 text-green-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400'
-                      : 'bg-red-500/10 border-red-500/40 text-red-400 hover:bg-green-500/10 hover:border-green-500/40 hover:text-green-400'
-                  }`}
-                >
-                  {item.is_available ? 'Available' : 'Hidden'}
-                </button>
+                {role === 'owner' && (
+                  <button
+                    onClick={() => toggleAvailability(item)}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
+                      item.is_available
+                        ? 'bg-green-500/10 border-green-500/40 text-green-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400'
+                        : 'bg-red-500/10 border-red-500/40 text-red-400 hover:bg-green-500/10 hover:border-green-500/40 hover:text-green-400'
+                    }`}
+                  >
+                    {item.is_available ? 'Available' : 'Hidden'}
+                  </button>
+                )}
                 <button onClick={() => openEdit(item)} className="px-3 py-1 rounded-lg text-xs font-medium bg-transparent border border-surface-border text-text-secondary hover:bg-surface border border-gray-700 transition-all">Edit</button>
                 <button onClick={() => softDelete(item)} className="px-3 py-1 rounded-lg text-xs font-medium bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all">Remove</button>
               </div>
