@@ -42,7 +42,7 @@ export default function OrderReservationPage() {
         .limit(1)
         .single()
 
-      if (data && ['pending', 'approved', 'arrived'].includes(data.status)) {
+      if (data && ['pending', 'approved', 'arrived', 'rejected'].includes(data.status)) {
         setActiveReservation(data)
       }
       
@@ -114,6 +114,7 @@ export default function OrderReservationPage() {
                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
                   activeReservation.status === 'approved' ? 'bg-green-500/20 text-green-400' :
                   activeReservation.status === 'arrived' ? 'bg-blue-500/20 text-blue-400' :
+                  activeReservation.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
                   'bg-yellow-500/20 text-yellow-400'
                 }`}>
                   {activeReservation.status}
@@ -130,6 +131,18 @@ export default function OrderReservationPage() {
                 <div className="mt-4 p-4 bg-indigo-900/30 border border-indigo-500/30 rounded-lg text-center">
                   <p className="text-sm text-indigo-300 mb-2">Your Entry Code</p>
                   <p className="text-3xl font-mono font-bold tracking-widest text-accent-amber">{activeReservation.unique_code}</p>
+                </div>
+              )}
+
+              {activeReservation.status === 'rejected' && (
+                <div className="mt-4 p-4 bg-red-900/30 border border-red-500/30 rounded-lg text-center">
+                  <p className="text-sm text-red-300 mb-4">Sorry, your reservation request could not be accommodated at this time.</p>
+                  <button 
+                    onClick={() => setActiveReservation(null)}
+                    className="px-4 py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 text-red-200 rounded-lg font-medium transition"
+                  >
+                    Request Again
+                  </button>
                 </div>
               )}
             </div>
