@@ -50,6 +50,12 @@ export default function OrderReservationPage() {
     }
     
     checkReservation()
+    
+    if (!user) return
+    const channel = supabase.channel('reservation_status_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservation_requests', filter: `customer_id=eq.${user.id}` }, checkReservation)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [user, authLoading])
 
   async function submitRequest(e: React.FormEvent) {

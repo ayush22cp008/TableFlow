@@ -37,7 +37,13 @@ export default function MenuManagementPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchItems() }, [fetchItems])
+  useEffect(() => {
+    fetchItems()
+    const channel = supabase.channel('owner_menu_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, fetchItems)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [fetchItems])
 
   function openAdd() {
     setEditItem(null)

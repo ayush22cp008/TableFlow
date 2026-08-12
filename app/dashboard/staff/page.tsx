@@ -32,6 +32,10 @@ export default function StaffManagementPage() {
 
   useEffect(() => {
     fetchData()
+    const channel = supabase.channel('staff_management_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchData)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   async function fetchData() {
