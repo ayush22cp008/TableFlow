@@ -74,6 +74,11 @@ export default function AnalyticsPage() {
       setLoading(false)
     }
     load()
+    const channel = supabase.channel('owner_analytics_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, load)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, load)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   const maxRevenue = Math.max(...weekData.map((d) => d.revenue), 1)
