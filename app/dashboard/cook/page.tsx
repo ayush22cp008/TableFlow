@@ -24,6 +24,10 @@ export default function CookDashboardPage() {
 
   useEffect(() => {
     fetchPreparingOrders()
+    const channel = supabase.channel('cook_orders_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchPreparingOrders)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [fetchPreparingOrders])
 
   async function markReady(order: Order) {

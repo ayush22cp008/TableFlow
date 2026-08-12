@@ -29,6 +29,10 @@ export default function WaiterDashboardPage() {
 
   useEffect(() => {
     fetchReadyOrders()
+    const channel = supabase.channel('waiter_orders_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchReadyOrders)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [fetchReadyOrders])
 
   async function markServed(order: WaiterOrder) {
