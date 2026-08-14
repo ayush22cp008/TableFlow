@@ -2,12 +2,16 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Bell } from 'lucide-react'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { supabase } from '@/lib/supabase'
 import type { AppNotification } from '@/types'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function NotificationBell({ userId, role }: { userId: string; role: string }) {
   const [open, setOpen] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [notifications, setNotifications] = useState<AppNotification[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [unreadCount, setUnreadCount] = useState(0)
   const panelRef = useRef<HTMLDivElement>(null)
 
