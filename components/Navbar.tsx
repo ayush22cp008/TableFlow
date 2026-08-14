@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { useAuth } from '@/lib/AuthContext'
+import NotificationBell from './NotificationBell'
 
 /**
  * Shared top navigation bar — role-aware.
@@ -48,6 +49,9 @@ export default function Navbar() {
             )}
 
 
+            {user && ['waiter', 'cook', 'manager'].includes(role || '') && (
+              <NotificationBell userId={user.id} role={role!} />
+            )}
             {user ? (
               <button
                 onClick={signOut}

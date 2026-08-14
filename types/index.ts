@@ -130,3 +130,32 @@ export type CartItem = {
   quantity: number
   notes?: string
 }
+
+// ---- Notifications ----
+export type NotificationType = 
+  | 'order_placed'
+  | 'order_preparing'
+  | 'order_ready'
+  | 'order_served'
+  | 'order_cancelled'
+  | 'reservation_requested'
+  | 'reservation_approved'
+  | 'reservation_rejected'
+
+export type AppNotification = {
+  id: string
+  recipient_role: UserRole | null
+  recipient_id: string | null
+  order_id: string | null
+  reservation_id: string | null
+  type: NotificationType
+  message: string
+  created_at: string
+}
+
+export type AppNotificationRead = {
+  id: string
+  notification_id: string
+  user_id: string
+  read_at: string
+}
