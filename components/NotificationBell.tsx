@@ -1,17 +1,13 @@
-'use client'
+﻿'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bell } from 'lucide-react'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { supabase } from '@/lib/supabase'
 import type { AppNotification } from '@/types'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function NotificationBell({ userId, role }: { userId: string; role: string }) {
   const [open, setOpen] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [notifications, setNotifications] = useState<AppNotification[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [unreadCount, setUnreadCount] = useState(0)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -26,10 +22,65 @@ export default function NotificationBell({ userId, role }: { userId: string; rol
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Fetch + realtime subscription — Antigravity to wire up against
-  // `notifications` + `notification_reads` tables per Node 9 schema.
-  // Query pattern (unread count) is documented in
-  // Chat16_Node9_ClaudeSpec_SchemaDesign.md — reuse that exact query.
+  // Fetch unread notifications on mount
+  const fetchNotifications = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select(`
+        id, recipient_role, recipient_id, order_id, reservation_id, type, message, created_at,
+        notification_reads!left(id)
+      `)
+      .or(`recipient_id.eq.${userId},recipient_role.eq.${role}`)
+      .order('created_at', { ascending: false })
+      .limit(50)
+
+    if (error || !data) return
+
+    const all = data as (AppNotification & { notification_reads: { id: string }[] })[]
+
+    // Unread = no entry in notification_reads for this user
+    const unread = all.filter((n) => n.notification_reads.length === 0)
+    setNotifications(all)
+    setUnreadCount(unread.length)
+  }, [userId, role])
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [fetchNotifications])
+
+  // Realtime subscription for new notifications
+  useEffect(() => {
+    const channel = supabase
+      .channel(`notifications:${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications' },
+        (payload) => {
+          const n = payload.new as AppNotification
+          // Filter client-side to this user's role or direct recipient
+          if (n.recipient_role === role || n.recipient_id === userId) {
+            setNotifications((prev) => [n, ...prev])
+            setUnreadCount((prev) => prev + 1)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userId, role])
+
+  // Mark as read -- insert into notification_reads
+  const markAsRead = async (notificationId: string) => {
+    const { error } = await supabase
+      .from('notification_reads')
+      .insert({ notification_id: notificationId, user_id: userId })
+
+    if (!error) {
+      setUnreadCount((prev) => Math.max(0, prev - 1))
+    }
+  }
 
   return (
     <div className="relative" ref={panelRef}>
@@ -55,7 +106,7 @@ export default function NotificationBell({ userId, role }: { userId: string; rol
               <div
                 key={n.id}
                 className="p-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50 cursor-pointer"
-                // onClick: mark as read — Antigravity to wire up insert into notification_reads
+                onClick={() => markAsRead(n.id)}
               >
                 <p className="text-sm text-white">{n.message}</p>
                 <p className="text-xs text-gray-500 mt-1">
