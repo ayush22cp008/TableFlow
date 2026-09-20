@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { Resend } from 'resend'
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       // Update profile
       const { error: updateProfileError } = await supabaseAdmin
         .from('profiles')
-        .update({ role, is_active: true, is_logged_in: false })
+        .update({ role, is_active: true, is_logged_in: false, staff_name: codeData.staff_name })
         .eq('id', userId)
 
       if (updateProfileError) {
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       userId = userData.user.id
 
       // Update the profile table explicitly
-      await supabaseAdmin.from('profiles').update({ role }).eq('id', userId)
+      await supabaseAdmin.from('profiles').update({ role, staff_name: codeData.staff_name }).eq('id', userId)
     }
 
     // 3. Mark the invite code as used
@@ -141,3 +141,4 @@ export async function POST(request: Request) {
     )
   }
 }
+

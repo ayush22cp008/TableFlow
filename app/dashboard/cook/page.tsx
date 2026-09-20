@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar'
 export default function CookDashboardPage() {
   const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
 
   const fetchPreparingOrders = useCallback(async () => {
     setLoading(true)
@@ -23,6 +24,12 @@ export default function CookDashboardPage() {
   }, [])
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.user) {
+        setUserId(data.session.user.id)
+      }
+    })
+
     fetchPreparingOrders()
     const channel = supabase.channel('cook_orders_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchPreparingOrders)
@@ -30,15 +37,30 @@ export default function CookDashboardPage() {
     return () => { supabase.removeChannel(channel) }
   }, [fetchPreparingOrders])
 
-  async function markReady(order: Order) {
-    // Cook prep -> ready policy applies
-    await supabase.from('orders').update({ 
-      status: 'ready', 
-      updated_at: new Date().toISOString() 
-    }).eq('id', order.id)
-    
-    // Refresh after updating
-    fetchPreparingOrders()
+  async function claimOrder(order: Order) {
+    try {
+      const { error } = await supabase.rpc('claim_order_as_cook', { p_order_id: order.id })
+      if (error) {
+        alert('Failed to claim order: ' + error.message)
+      } else {
+        fetchPreparingOrders()
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async function completeOrder(order: Order) {
+    try {
+      const { error } = await supabase.rpc('complete_order_as_cook', { p_order_id: order.id })
+      if (error) {
+        alert('Failed to mark ready: ' + error.message)
+      } else {
+        fetchPreparingOrders()
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -55,7 +77,7 @@ export default function CookDashboardPage() {
             disabled={loading}
             className="bg-surface hover:bg-surface-border border border-surface-border text-white px-5 py-2.5 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? 'Refreshing...' : '↻ Refresh Queue'}
+            {loading ? 'Refreshing...' : '🔄 Refresh Queue'}
           </button>
         </div>
 
@@ -71,8 +93,11 @@ export default function CookDashboardPage() {
                 ? `${order.is_priority ? 'R' : 'W'}${order.daily_number}`
                 : `#${order.id.slice(0, 6)}`
               
+              const isClaimedByMe = order.claimed_by_cook_id === userId
+              const isClaimedByOther = order.claimed_by_cook_id != null && !isClaimedByMe
+              
               return (
-                <div key={order.id} className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-lg flex flex-col">
+                <div key={order.id} className={`bg-gray-900/80 border ${isClaimedByMe ? 'border-accent-indigo' : 'border-gray-800'} rounded-xl p-5 shadow-lg flex flex-col ${isClaimedByOther ? 'opacity-50 grayscale' : ''}`}>
                   <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-800">
                     <div className="flex items-center gap-3">
                       <span className="text-xl font-bold text-white font-mono">{orderNumber}</span>
@@ -101,19 +126,37 @@ export default function CookDashboardPage() {
                     )}
                   </ul>
                   
-                  <button 
-                    onClick={() => markReady(order)}
-                    className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(22,163,74,0.3)] text-lg"
-                  >
-                    Mark Ready
-                  </button>
+                  {!order.claimed_by_cook_id && (
+                    <button 
+                      onClick={() => claimOrder(order)}
+                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] text-lg"
+                    >
+                      Claim Order
+                    </button>
+                  )}
+                  {isClaimedByMe && (
+                    <button 
+                      onClick={() => completeOrder(order)}
+                      className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(22,163,74,0.3)] text-lg"
+                    >
+                      Mark Ready
+                    </button>
+                  )}
+                  {isClaimedByOther && (
+                    <button 
+                      disabled
+                      className="w-full py-3 bg-gray-800 text-gray-400 font-bold rounded-lg cursor-not-allowed text-lg"
+                    >
+                      Claimed by another Cook
+                    </button>
+                  )}
                 </div>
               )
             })}
             
             {orders.length === 0 && !loading && (
               <div className="col-span-full bg-surface border border-surface-border rounded-xl p-12 text-center">
-                <span className="text-5xl mb-4 block">🍳</span>
+                <span className="text-5xl mb-4 block">🍽️</span>
                 <h3 className="text-xl font-medium text-white mb-1">Queue is empty</h3>
                 <p className="text-gray-400">No orders are currently preparing.</p>
               </div>

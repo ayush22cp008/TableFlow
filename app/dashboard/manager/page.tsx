@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -9,10 +9,14 @@ import { formatOrderNumber } from '@/lib/utils'
 type ManagerOrder = Order & {
   order_items: { quantity: number; unit_price: number; menu_items: { name: string } }[]
   restaurant_tables?: { table_number: number }
+  cook?: { staff_name: string | null; email: string } | null;
+  waiter?: { staff_name: string | null; email: string } | null;
 }
 
 export default function ManagerDashboardPage() {
   const [placedOrders, setPlacedOrders] = useState<ManagerOrder[]>([])
+  const [preparingOrders, setPreparingOrders] = useState<ManagerOrder[]>([])
+  const [readyOrders, setReadyOrders] = useState<ManagerOrder[]>([])
   const [servedOrders, setServedOrders] = useState<ManagerOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [paymentMethods, setPaymentMethods] = useState<Record<string, string>>({})
@@ -22,20 +26,36 @@ export default function ManagerDashboardPage() {
     
     const { data: placedData } = await supabase
       .from('orders')
-      .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number)')
+      .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number), cook:profiles!claimed_by_cook_id(staff_name, email), waiter:profiles!claimed_by_waiter_id(staff_name, email)')
       .eq('status', 'placed')
+      .order('is_priority', { ascending: false })
+      .order('created_at', { ascending: true })
+
+    const { data: preparingData } = await supabase
+      .from('orders')
+      .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number), cook:profiles!claimed_by_cook_id(staff_name, email), waiter:profiles!claimed_by_waiter_id(staff_name, email)')
+      .eq('status', 'preparing')
+      .order('is_priority', { ascending: false })
+      .order('created_at', { ascending: true })
+
+    const { data: readyData } = await supabase
+      .from('orders')
+      .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number), cook:profiles!claimed_by_cook_id(staff_name, email), waiter:profiles!claimed_by_waiter_id(staff_name, email)')
+      .eq('status', 'ready')
       .order('is_priority', { ascending: false })
       .order('created_at', { ascending: true })
 
     const { data: servedData } = await supabase
       .from('orders')
-      .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number)')
+      .select('*, order_items(quantity, unit_price, menu_items(name)), restaurant_tables(table_number), cook:profiles!claimed_by_cook_id(staff_name, email), waiter:profiles!claimed_by_waiter_id(staff_name, email)')
       .eq('status', 'served')
       .order('is_priority', { ascending: false })
       .order('created_at', { ascending: true })
     
-    setPlacedOrders(placedData ?? [])
-    setServedOrders(servedData ?? [])
+    setPlacedOrders((placedData as unknown as ManagerOrder[]) ?? [])
+    setPreparingOrders((preparingData as unknown as ManagerOrder[]) ?? [])
+    setReadyOrders((readyData as unknown as ManagerOrder[]) ?? [])
+    setServedOrders((servedData as unknown as ManagerOrder[]) ?? [])
     
     // Initialize payment methods for served orders if not already set
     setPaymentMethods(prev => {
@@ -55,7 +75,8 @@ export default function ManagerDashboardPage() {
 
   useEffect(() => {
     fetchOrders()
-    const channel = supabase.channel('manager_orders_realtime')
+    
+    const channel = supabase.channel('manager_dashboard_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchOrders)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -71,18 +92,15 @@ export default function ManagerDashboardPage() {
   }
 
   async function markPaid(orderId: string) {
-    const method = paymentMethods[orderId] || 'cash'
-    await supabase.rpc('mark_order_paid', { p_order_id: orderId, p_payment_method: method })
+    await supabase.from('orders').update({ 
+      status: 'billed', 
+      updated_at: new Date().toISOString() 
+    }).eq('id', orderId)
     
     fetchOrders()
   }
 
   const printBill = () => {
-    // In a real app we might open a printable window or render a specific print component,
-    // but the instruction specifies lightweight window.print() + @media print.
-    // We add a 'print-bill' id to identify what to print, or just rely on CSS.
-    // Easiest is to add a data-attribute or class to the body during print, but simpler is just window.print()
-    // and letting CSS handle hiding Navbar etc.
     window.print()
   }
 
@@ -92,43 +110,24 @@ export default function ManagerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 print-bg-white print-text-black">
-      <div className="print-hidden">
-        <Navbar />
-      </div>
-      <main className="max-w-7xl mx-auto px-4 py-10 print-p-0">
+    <div className="min-h-screen bg-gray-950 text-gray-100">
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 print-hidden">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-white">Manager Dashboard</h1>
-            <p className="text-gray-400 mt-1">Intake and Billing Queues</p>
+            <p className="text-gray-400 mt-1">Intake, Kitchen, Waiter, and Billing Queues</p>
           </div>
           <button 
             onClick={fetchOrders}
             disabled={loading}
             className="bg-surface hover:bg-surface-border border border-surface-border text-white px-5 py-2.5 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? 'Refreshing...' : '↻ Refresh Queues'}
+            {loading ? 'Refreshing...' : '🔄 Refresh View'}
           </button>
         </div>
 
-        {/* Global Print Style for simple receipts */}
-        <style dangerouslySetInnerHTML={{__html: `
-          @media print {
-            body { background: white; color: black; }
-            .print-hidden { display: none !important; }
-            .print-only { display: block !important; }
-            .print-break-inside-avoid { break-inside: avoid; }
-            .print-bg-white { background: white !important; }
-            .print-text-black { color: black !important; }
-            .print-border-black { border-color: black !important; }
-            .print-shadow-none { box-shadow: none !important; }
-            
-            /* Hide all cards except the one we want to print - ideally handled via JS, but for simplicity we print all served orders on separate pages or just let user select */
-            /* A better approach is to render a dedicated print view if we needed perfect single-receipt printing */
-          }
-        `}} />
-
-        {loading && placedOrders.length === 0 && servedOrders.length === 0 ? (
+        {loading && placedOrders.length === 0 && servedOrders.length === 0 && preparingOrders.length === 0 && readyOrders.length === 0 ? (
           <div className="flex justify-center my-20 print-hidden">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-indigo"></div>
           </div>
@@ -179,6 +178,86 @@ export default function ManagerDashboardPage() {
               </div>
             </div>
 
+            {/* IN PROGRESS (PREPARING) QUEUE */}
+            <div className="print-hidden">
+              <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
+                <span className="bg-amber-500 w-3 h-8 rounded-sm inline-block"></span>
+                In Progress (Preparing)
+              </h2>
+              <div className="space-y-4">
+                {preparingOrders.length === 0 && (
+                   <div className="bg-surface border border-surface-border rounded-xl p-8 text-center text-gray-400">
+                     No orders currently preparing.
+                   </div>
+                )}
+                {preparingOrders.map(order => (
+                  <div key={order.id} className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-lg">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="text-lg font-bold text-white">Order {formatOrderNumber(order)}</div>
+                        {order.restaurant_tables?.table_number && (
+                          <div className="text-indigo-400 font-medium">Table {order.restaurant_tables.table_number}</div>
+                        )}
+                        {order.cook?.staff_name ? (
+                          <div className="text-sm text-amber-300 mt-1">Cook: {order.cook.staff_name} ({order.cook.email})</div>
+                        ) : (
+                          <div className="text-sm text-gray-400 mt-1 italic">Unclaimed (Waiting for Cook)</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <ul className="text-sm text-gray-300 space-y-1 pt-4 border-t border-gray-800">
+                      {order.order_items?.map((item, i: number) => (
+                        <li key={i} className="flex justify-between">
+                          <span>{item.quantity}x {item.menu_items?.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* READY (WAITING FOR WAITER) QUEUE */}
+            <div className="print-hidden">
+              <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
+                <span className="bg-blue-500 w-3 h-8 rounded-sm inline-block"></span>
+                Ready (Waiting for Waiter)
+              </h2>
+              <div className="space-y-4">
+                {readyOrders.length === 0 && (
+                   <div className="bg-surface border border-surface-border rounded-xl p-8 text-center text-gray-400">
+                     No orders ready to serve.
+                   </div>
+                )}
+                {readyOrders.map(order => (
+                  <div key={order.id} className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-lg">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="text-lg font-bold text-white">Order {formatOrderNumber(order)}</div>
+                        {order.restaurant_tables?.table_number && (
+                          <div className="text-indigo-400 font-medium">Table {order.restaurant_tables.table_number}</div>
+                        )}
+                        {order.waiter?.staff_name ? (
+                          <div className="text-sm text-blue-300 mt-1">Waiter: {order.waiter.staff_name} ({order.waiter.email})</div>
+                        ) : (
+                          <div className="text-sm text-gray-400 mt-1 italic">Unclaimed (Waiting for Waiter)</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <ul className="text-sm text-gray-300 space-y-1 pt-4 border-t border-gray-800">
+                      {order.order_items?.map((item, i: number) => (
+                        <li key={i} className="flex justify-between">
+                          <span>{item.quantity}x {item.menu_items?.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* BILLING QUEUE */}
             <div>
               <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2 print-hidden">
@@ -202,6 +281,7 @@ export default function ManagerDashboardPage() {
                         {order.restaurant_tables?.table_number && (
                           <div className="text-indigo-400 font-medium font-mono text-lg mt-1 print-text-black">Table {order.restaurant_tables.table_number}</div>
                         )}
+                        {/* We don't need cook/waiter on the final printed bill since it's cleared, but we can show it if it were present */}
                       </div>
                       
                       <div className="mb-6">

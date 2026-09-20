@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // TypeScript types for all VibeAthon DB tables
 // ============================================================
 
@@ -31,6 +31,7 @@ export type UserProfile = {
   id: string
   email: string
   role: UserRole
+  staff_name?: string | null
   created_at: string
 }
 
@@ -82,6 +83,8 @@ export type OrderStatus = 'placed' | 'preparing' | 'ready' | 'served' | 'billed'
 export type Order = {
   id: string
   table_id: string | null
+  claimed_by_cook_id?: string | null
+  claimed_by_waiter_id?: string | null
   customer_id: string | null
   status: OrderStatus
   subtotal: number
@@ -141,6 +144,7 @@ export type NotificationType =
   | 'reservation_requested'
   | 'reservation_approved'
   | 'reservation_rejected'
+  | 'order_claimed'
 
 export type AppNotification = {
   id: string
@@ -159,3 +163,6 @@ export type AppNotificationRead = {
   user_id: string
   read_at: string
 }
+
+
+
