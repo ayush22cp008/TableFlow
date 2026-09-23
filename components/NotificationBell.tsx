@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { AppNotification } from '@/types'
+import PushSubscriptionButton from './PushSubscriptionButton'
 
 export default function NotificationBell({ userId, role }: { userId: string; role: string }) {
   const [open, setOpen] = useState(false)
@@ -99,6 +100,7 @@ export default function NotificationBell({ userId, role }: { userId: string; rol
 
       {open && (
         <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-lg shadow-lg z-50">
+          <PushSubscriptionButton />
           {notifications.length === 0 ? (
             <div className="p-4 text-sm text-gray-400 text-center">No notifications</div>
           ) : (
