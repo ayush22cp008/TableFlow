@@ -32,7 +32,10 @@ CREATE TABLE public.push_delivery_dedup (
     notification_id uuid not null,
     subscription_id uuid not null,
     created_at timestamptz not null default now(),
+    success_at timestamptz null,
     primary key (notification_id, subscription_id)
 );
 
 ALTER TABLE public.push_delivery_dedup ENABLE ROW LEVEL SECURITY;
+
+
