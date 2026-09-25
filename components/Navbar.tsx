@@ -51,19 +51,21 @@ export default function Navbar() {
     <nav className="border-b border-gray-800 bg-gray-900/70 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href={logoHref} className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg text-sm">
-              TF
-            </div>
-            <span className="font-semibold text-lg tracking-tight text-white">TableFlow</span>
-          </Link>
+          <div className="flex items-center gap-8">
+            {/* Logo */}
+            <Link href={logoHref} className="flex items-center gap-2 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg text-sm">
+                TF
+              </div>
+              <span className="font-semibold text-lg tracking-tight text-white">TableFlow</span>
+            </Link>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden sm:flex items-center gap-2">
-            {user && role === 'customer' && customerLinks}
-            {user && role === 'owner'    && ownerLinks}
-            {user && role === 'manager'  && managerLinks}
+            {/* Desktop Nav Links */}
+            <div className="hidden sm:flex items-center gap-2">
+              {user && role === 'customer' && customerLinks}
+              {user && role === 'owner'    && ownerLinks}
+              {user && role === 'manager'  && managerLinks}
+            </div>
           </div>
 
           {/* Unified Right Actions */}
@@ -125,3 +127,4 @@ export default function Navbar() {
     </nav>
   )
 }
+
