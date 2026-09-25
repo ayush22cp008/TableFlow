@@ -99,7 +99,7 @@ export default function NotificationBell({ userId, role }: { userId: string; rol
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] max-h-96 overflow-y-auto bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-lg shadow-lg z-50">
           <PushSubscriptionButton />
           {notifications.length === 0 ? (
             <div className="p-4 text-sm text-gray-400 text-center">No notifications</div>
@@ -122,3 +122,4 @@ export default function NotificationBell({ userId, role }: { userId: string; rol
     </div>
   )
 }
+
