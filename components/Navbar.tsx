@@ -64,40 +64,41 @@ export default function Navbar() {
             {user && role === 'customer' && customerLinks}
             {user && role === 'owner'    && ownerLinks}
             {user && role === 'manager'  && managerLinks}
+          </div>
 
+          {/* Unified Right Actions */}
+          <div className="flex items-center gap-2">
+            {/* Notification Bell (always rendered exactly once for staff roles) */}
             {user && ['waiter', 'cook', 'manager'].includes(role || '') && (
               <NotificationBell userId={user.id} role={role!} />
             )}
+
+            {/* Desktop Auth Buttons */}
             {user ? (
               <button
                 onClick={signOut}
-                className="ml-2 px-4 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm font-medium text-white transition-colors border border-gray-700"
+                className="hidden sm:block ml-2 px-4 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm font-medium text-white transition-colors border border-gray-700"
               >
                 Sign Out
               </button>
             ) : (
-              <Link href="/login" className="ml-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-medium text-white transition-colors">
+              <Link href="/login" className="hidden sm:block ml-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-medium text-white transition-colors">
                 Sign In
               </Link>
             )}
-          </div>
 
-          {/* Mobile right cluster: bell + hamburger */}
-          <div className="flex sm:hidden items-center gap-2">
-            {user && ['waiter', 'cook', 'manager'].includes(role || '') && (
-              <NotificationBell userId={user.id} role={role!} />
-            )}
+            {/* Mobile Hamburger Menu Toggle & Mobile Auth */}
             {user && (
               <button
                 onClick={() => setMobileOpen((o) => !o)}
-                className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-700 transition-colors"
                 aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               >
                 {mobileOpen ? <X className="w-5 h-5 text-gray-300" /> : <Menu className="w-5 h-5 text-gray-300" />}
               </button>
             )}
             {!user && (
-              <Link href="/login" className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-medium text-white transition-colors">
+              <Link href="/login" className="sm:hidden px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-medium text-white transition-colors">
                 Sign In
               </Link>
             )}
