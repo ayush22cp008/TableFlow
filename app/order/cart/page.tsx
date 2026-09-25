@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 /**
- * CP4: Cart page — review items, place order
+ * CP4: Cart page â€” review items, place order
  * Auto-allocates best-fit available table by party size.
  * Falls back to waitlist if no suitable table is available.
  * Displays waitlist status to customer on load.
@@ -24,7 +24,8 @@ export default function CartPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [cart, setCart] = useState<CartItem[]>([])
-  const [partySize, setPartySize] = useState(1)
+  const [partySizeInput, setPartySizeInput] = useState('1')
+  const partySize = Math.max(1, parseInt(partySizeInput) || 1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -103,7 +104,7 @@ export default function CartPage() {
       // @ts-expect-error - Ignore relation type for table_number
       table_number: data.restaurant_tables?.table_number 
     })
-    setPartySize(data.party_size)
+    setPartySizeInput(String(data.party_size))
     setVerifyingCode(false)
   }
 
@@ -148,7 +149,7 @@ export default function CartPage() {
       }
     }
 
-    // Step 2a: Table found — place the order and mark table occupied
+    // Step 2a: Table found â€” place the order and mark table occupied
     if (assignedTableId) {
       const { data: orderId, error: rpcError } = await supabase.rpc(
         'place_order_and_occupy_table',
@@ -200,7 +201,7 @@ export default function CartPage() {
       return
     }
 
-    // Step 2b: No table available — add to waitlist (no order created)
+    // Step 2b: No table available â€” add to waitlist (no order created)
     const { data: profile } = await supabase
       .from('profiles')
       .select('email')
@@ -289,7 +290,7 @@ export default function CartPage() {
           <Navbar />
           <main className="max-w-2xl mx-auto px-4 py-10">
             <div className="text-center py-20">
-              <div className="text-5xl mb-4">⏳</div>
+              <div className="text-5xl mb-4">â³</div>
               <p className="text-xl font-semibold text-yellow-400">
                 No table available right now. You&apos;ve been added to the waitlist.
               </p>
@@ -311,7 +312,7 @@ export default function CartPage() {
           <Navbar />
           <main className="max-w-2xl mx-auto px-4 py-10">
             <div className="text-center py-20">
-              <div className="text-5xl mb-4">🎉</div>
+              <div className="text-5xl mb-4">ðŸŽ‰</div>
               <p className="text-xl font-semibold text-green-400">
                 Your table is ready! Table {waitlistEntry.restaurant_tables?.table_number}
               </p>
@@ -358,7 +359,7 @@ export default function CartPage() {
           <Navbar />
           <main className="max-w-2xl mx-auto px-4 py-10">
             <div className="text-center py-20">
-              <div className="text-5xl mb-4">⚠️</div>
+              <div className="text-5xl mb-4">âš ï¸</div>
               <p className="text-xl font-semibold text-red-400 mb-6">
                 Your waitlist request was cancelled by the restaurant. Please try again or contact staff.
               </p>
@@ -380,14 +381,14 @@ export default function CartPage() {
     }
   }
 
-  // Confirmation screen — shown after direct success (table found immediately or waitlist order placed)
+  // Confirmation screen â€” shown after direct success (table found immediately or waitlist order placed)
   if (successMessage) {
     return (
       <div className="min-h-screen bg-gray-950 text-gray-100">
         <Navbar />
         <main className="max-w-2xl mx-auto px-4 py-10">
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">🎉</div>
+            <div className="text-5xl mb-4">ðŸŽ‰</div>
             <p className="text-xl font-semibold text-green-400">
               {successMessage}
             </p>
@@ -406,7 +407,7 @@ export default function CartPage() {
 
         {cart.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <div className="text-4xl mb-3">🛒</div>
+            <div className="text-4xl mb-3">ðŸ›’</div>
             <p>Your cart is empty</p>
           </div>
         ) : (
@@ -415,15 +416,15 @@ export default function CartPage() {
               <div key={menuItem.id} className="flex items-center justify-between p-4 bg-surface border border-surface-border rounded-card shadow-card">
                 <div>
                   <p className="font-medium text-white">{menuItem.name}</p>
-                  <p className="text-sm text-accent-amber">₹{menuItem.price.toFixed(2)} × {quantity}</p>
+                  <p className="text-sm text-accent-amber">â‚¹{menuItem.price.toFixed(2)} Ã— {quantity}</p>
                 </div>
-                <span className="text-accent-amber font-semibold">₹{(menuItem.price * quantity).toFixed(2)}</span>
+                <span className="text-accent-amber font-semibold">â‚¹{(menuItem.price * quantity).toFixed(2)}</span>
               </div>
             ))}
 
             <div className="border-t border-gray-800 pt-4 flex justify-between text-lg font-bold">
               <span>Subtotal</span>
-              <span className="text-accent-amber">₹{subtotal.toFixed(2)}</span>
+              <span className="text-accent-amber">â‚¹{subtotal.toFixed(2)}</span>
             </div>
 
             {/* Reservation Code */}
@@ -449,11 +450,11 @@ export default function CartPage() {
                 )}
               </div>
               {verifiedReservation && (
-                <p className="mt-2 text-sm text-green-400">✓ Code applied. Table {verifiedReservation.table_number} assigned.</p>
+                <p className="mt-2 text-sm text-green-400">âœ“ Code applied. Table {verifiedReservation.table_number} assigned.</p>
               )}
             </div>
 
-            {/* Party Size input — used for auto table allocation */}
+            {/* Party Size input â€” used for auto table allocation */}
             <div className="mt-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Party Size
@@ -461,11 +462,15 @@ export default function CartPage() {
               </label>
               <input
                 type="number"
-                value={partySize}
+                value={partySizeInput}
                 min={1}
                 max={maxCapacity}
                 disabled={!!verifiedReservation}
-                onChange={(e) => setPartySize(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => setPartySizeInput(e.target.value)}
+                onBlur={(e) => {
+                  const n = Math.max(1, parseInt(e.target.value) || 1)
+                  setPartySizeInput(String(n))
+                }}
                 className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700 rounded-card shadow-card text-white outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
               />
               {partySize > maxCapacity && (
@@ -484,7 +489,7 @@ export default function CartPage() {
               disabled={loading || partySize > maxCapacity}
               className="w-full py-3 bg-accent-indigo hover:bg-accent-indigo-hover text-white font-medium rounded-card shadow-card transition-all disabled:opacity-50 mt-2"
             >
-              {loading ? 'Finding your table...' : '✓ Place Order'}
+              {loading ? 'Finding your table...' : 'âœ“ Place Order'}
             </button>
           </div>
         )}
@@ -492,3 +497,6 @@ export default function CartPage() {
     </div>
   )
 }
+
+
+
