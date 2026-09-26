@@ -139,9 +139,15 @@ Configure `.env.local`:
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 GEMINI_API_KEY=your_gemini_api_key
 RESEND_API_KEY=your_resend_api_key
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your_vapid_public_key
+VAPID_PRIVATE_KEY=your_vapid_private_key
+VAPID_SUBJECT=mailto:your_email@example.com
+PUSH_WEBHOOK_SECRET=your_push_webhook_secret
 ```
+`SUPABASE_SERVICE_ROLE_KEY` is required for server-side admin actions (e.g. staff deactivation/deletion). The `VAPID_*` and `PUSH_WEBHOOK_SECRET` variables are required for the Push Notifications feature described in Section 2 — you can generate your own VAPID key pair with `npx web-push generate-vapid-keys`.
 Enable Google OAuth in Supabase Auth → Providers, with your own OAuth client credentials.
 
 Run locally:
