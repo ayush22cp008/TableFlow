@@ -122,7 +122,7 @@ Since this is a shared live instance, please avoid deleting other visitors' test
 **Demo login:**
 ```
 Email: owner.demo@tableflow.systems
-Password: [set your own]
+Password: owner@123
 ```
 
 ---
