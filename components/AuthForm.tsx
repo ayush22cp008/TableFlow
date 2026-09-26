@@ -19,7 +19,7 @@ const ROLE_ICONS: Record<UserRole, string> = {
 // Real security is via RLS is_owner() check in DB.
 // Change this value before demoing if needed.
 // ============================================================
-export const OWNER_INVITE_CODE = 'TableFlow12'
+export const OWNER_INVITE_CODE = 'Ayush@0089'
 
 type SignupStep = 'role' | 'credentials' | 'verify' | 'staff-verify'
 
